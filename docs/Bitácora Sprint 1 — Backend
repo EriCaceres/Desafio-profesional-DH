@@ -1,0 +1,15 @@
+# Bitácora Sprint 1 — Backend
+
+## Endpoints
+- POST /api/products → Crear producto
+- GET /api/products → Listar todos
+- GET /api/products/random?limit=10 → Aleatorios
+- GET /api/products/{id} → Detalle
+- DELETE /api/products/{id} → Eliminar
+
+## Casos de prueba
+- Crear producto válido → OK
+- Crear duplicado → 400 con mensaje
+- Listar devuelve productos
+- Detalle inexistente → error
+- Eliminar producto → desaparece del listado
