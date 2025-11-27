@@ -8,6 +8,6 @@ import java.util.List;
 
 public interface ProductRepository extends JpaRepository<Product, Long> {
     boolean existsByNameIgnoreCase(String name);
-    @Query(value = "SELECT * FROM products ORDER BY RANDOM() LIMIT:limit", nativeQuery = true)
-    java.util.List<Product> random(@Param("limit") int limit);
+    @Query(value = "SELECT * FROM products ORDER BY RANDOM() LIMIT :limit", nativeQuery = true)
+    List<Product> random(@Param("limit") int limit);
 }

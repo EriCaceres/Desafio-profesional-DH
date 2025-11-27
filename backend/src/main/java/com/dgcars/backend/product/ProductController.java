@@ -42,7 +42,7 @@ public class ProductController {
     }
 
 
-    // Listar todos (paginado simple más adelante)
+    // Listar
     @GetMapping
     public List<Product> list() {
         return repo.findAll();
