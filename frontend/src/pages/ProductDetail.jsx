@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { api } from "../services/api";
 
 export default function ProductDetail() {
@@ -11,11 +11,13 @@ export default function ProductDetail() {
   useEffect(() => {
     const load = async () => {
       try {
+        setLoading(true);
         const { data } = await api.get(`/api/products/${id}`);
         setProduct(data);
+        setErr("");
       } catch (e) {
         console.error(e);
-        setErr("No se pudo cargar el producto");
+        setErr("No se pudo cargar el servicio.");
       } finally {
         setLoading(false);
       }
@@ -25,9 +27,9 @@ export default function ProductDetail() {
 
   if (loading) {
     return (
-      <main className="bg-gray-100 min-h-screen pt-16 pb-10">
-        <div className="max-w-6xl mx-auto px-4">
-          <p>Cargando producto...</p>
+      <main className="pt-16 bg-gray-100 min-h-screen pb-10">
+        <div className="max-w-4xl mx-auto px-4">
+          <p className="text-sm text-gray-600 mt-4">Cargando servicio...</p>
         </div>
       </main>
     );
@@ -35,65 +37,73 @@ export default function ProductDetail() {
 
   if (err || !product) {
     return (
-      <main className="bg-gray-100 min-h-screen pt-16 pb-10">
-        <div className="max-w-6xl mx-auto px-4">
-          <p className="text-red-600">{err || "Producto no encontrado"}</p>
+      <main className="pt-16 bg-gray-100 min-h-screen pb-10">
+        <div className="max-w-4xl mx-auto px-4 space-y-3 mt-4">
+          <p className="text-sm text-red-600">{err || "Servicio no encontrado."}</p>
+          <Link to="/" className="text-sm text-blue-600 hover:underline">
+            Volver al inicio
+          </Link>
         </div>
       </main>
     );
   }
 
+  const hasFeatures = Array.isArray(product.features) && product.features.length > 0;
+
   return (
-    <main className="bg-gray-100 min-h-screen pt-16 pb-10">
-      <div className="max-w-6xl mx-auto px-4 space-y-6">
+    <main className="pt-16 bg-gray-100 min-h-screen pb-10">
+      <div className="max-w-4xl mx-auto px-4 space-y-6 mt-4">
+        <Link to="/" className="text-sm text-blue-600 hover:underline">
+          ← Volver al inicio
+        </Link>
 
-        <header className="flex items-center justify-between bg-white px-6 py-4 rounded shadow mt-4">
-          <h1 className="text-2xl font-bold">{product.name}</h1>
+        <section className="bg-white rounded shadow p-5 space-y-3">
+          <div className="flex flex-col gap-1">
+            <h1 className="text-2xl font-bold">{product.name}</h1>
+            {product.category && (
+              <p className="text-sm text-gray-600">
+                Categoría: <span className="font-medium">{product.category.name}</span>
+              </p>
+            )}
+          </div>
 
-          <button
-            onClick={() => window.history.back()}
-            className="text-sm text-blue-600 hover:underline"
-          >
-            ← Volver
-          </button>
-        </header>
+          {product.description && (
+            <p className="text-sm text-gray-700">{product.description}</p>
+          )}
 
+          <div className="flex flex-wrap gap-4 text-sm text-gray-700 mt-2">
+            {product.durationMin != null && (
+              <span className="inline-flex items-center gap-1">
+                ⏱ {product.durationMin} min
+              </span>
+            )}
+            {product.priceFrom != null && (
+              <span className="inline-flex items-center gap-1">
+                💲 Desde ${product.priceFrom}
+              </span>
+            )}
+          </div>
+        </section>
 
-        <section className="bg-white p-4 rounded shadow">
-          <div className="grid md:grid-cols-2 gap-3">
-
-            <div className="h-48 bg-gray-200 flex items-center justify-center rounded">
-              <span className="text-sm text-gray-600">Imagen principal</span>
-            </div>
-
-            <div className="grid grid-cols-2 grid-rows-2 gap-2">
-              {Array.from({ length: 4 }).map((_, i) => (
-                <div
-                  key={i}
-                  className="h-20 bg-gray-200 flex items-center justify-center rounded text-xs text-gray-600"
+        {hasFeatures && (
+          <section className="bg-white rounded shadow p-5 space-y-3">
+            <h2 className="text-lg font-semibold">Incluye</h2>
+            <ul className="flex flex-wrap gap-2">
+              {product.features.map((f) => (
+                <li
+                  key={f.id}
+                  className="border rounded-full px-3 py-1 text-sm flex items-center gap-2"
                 >
-                  Imagen {i + 1}
-                </div>
+                  <span>{f.icon}</span>
+                  <span>{f.name}</span>
+                </li>
               ))}
-            </div>
-          </div>
-
-          <div className="text-right mt-2">
-            <button className="text-blue-600 text-sm hover:underline">
-              Ver más
-            </button>
-          </div>
-        </section>
-
-        <section className="bg-white p-4 rounded shadow">
-          <h2 className="font-semibold mb-2">Descripción</h2>
-          <p className="text-gray-700 text-sm leading-relaxed">
-            {product.description || "Este servicio no tiene descripción cargada aún."}
-          </p>
-        </section>
-
+            </ul>
+          </section>
+        )}
       </div>
     </main>
   );
 }
+
 
