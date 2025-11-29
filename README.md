@@ -1,172 +1,191 @@
-# ShineLab – Sistema de Reservas de Servicios de Detailing  
-Proyecto final – Certified Tech Developer – Digital House
+Shine Lab
 
----------------------------------------------------------
+Sistema de Reservas de Servicios de Estética Automotor
+Trabajo Final – Programación 1 – Certified Tech Developer (Digital House)
 
-## Descripción del proyecto
+1. Descripción del Proyecto
 
-ShineLab es una plataforma web desarrollada para gestionar reservas de servicios de detailing automotor.  
-Permite a los usuarios explorar servicios, ver detalles y reservar turnos (en sprints posteriores).  
-Incluye un panel de administración desde donde se gestionan los servicios del catálogo.
+DG Car Detail es una aplicación web que permite gestionar servicios de estética automotor.
+Incluye catálogo de productos, categorías, características, registro de usuarios, inicio de sesión y un panel de administración exclusivo para administradores.
 
-El proyecto está dividido en dos módulos principales:
-- Backend: API REST en Java Spring Boot  
-- Frontend: Aplicación en React + Vite  
+El sistema está dividido en dos módulos:
 
-Este repositorio contiene todo el desarrollo correspondiente al Sprint 1.
+Backend: Java + Spring Boot
 
----------------------------------------------------------
+Frontend: React + Vite
 
-## Tecnologías utilizadas
+2. Tecnologías utilizadas
+Backend
 
-Frontend:
-- React  
-- Vite  
-- React Router  
-- TailwindCSS  
-- Axios  
+Java 17
+
+Spring Boot
+
+Spring Web
+
+Spring Data JPA
+
+H2 Database
+
+Maven
+
+Frontend
+
+React
+
+Vite
+
+TailwindCSS
+
+Axios
+
+React Router DOM
+
+3. Funcionalidades principales
+Sprint 1
+
+API CRUD de productos (GET, POST, DELETE).
+
+Panel de administración para crear y eliminar productos.
+
+Vista Home con listado, recomendaciones y detalle de productos.
+
+Paginación y consumo del backend desde el frontend.
+
+Documentación del Sprint.
+
+Sprint 2
+
+Registro de usuarios.
+
+Login con validación de credenciales.
+
+Asignación de roles (USER y ADMIN).
+
+Acceso restringido al panel de administración.
+
+CRUD de categorías.
+
+CRUD de características.
+
+Asociación producto → características y categoría.
+
+Actualización visual del Home para mostrar categorías y filtros.
+
+Documentación del Sprint 2.
+
+4. Estructura del proyecto
+dg-car-detail/
+│
+├── backend/
+│   ├── src/main/java/com/dgcars/backend/
+│   │   ├── product/
+│   │   ├── feature/
+│   │   ├── category/
+│   │   └── user/
+│   ├── src/main/resources/
+│   └── pom.xml
+│
+└── frontend/
+    ├── src/components/
+    ├── src/pages/
+    ├── src/services/
+    ├── package.json
+    └── vite.config.js
+
+5. Ejecución del proyecto
+Backend
+
+Abrir IntelliJ o cualquier IDE Java.
+
+Abrir carpeta backend/.
+
+Ejecutar la clase BackendApplication.
+
+El servidor se inicia en
+http://localhost:8080
+
+Frontend
+
+Abrir terminal dentro de frontend/.
+
+Instalar dependencias:
+
+npm install
+
+
+Ejecutar el servidor de desarrollo:
+
+npm run dev
+
+
+Abrir http://localhost:5173
+
+6. Endpoints principales
+Productos
+GET    /api/products
+GET    /api/products/{id}
+POST   /api/products
+DELETE /api/products/{id}
+
+Categorías
+GET    /api/categories
+POST   /api/categories
+
+Características
+GET    /api/features
+POST   /api/features
+
+Autenticación
+POST   /api/auth/register
+POST   /api/auth/login
+
+7. Usuarios y roles
+
+El registro crea usuarios con rol "USER".
+
+Si el usuario se registra con correo que comienza con "admin@", se asigna automáticamente el rol "ADMIN".
+
+Solo usuarios con rol ADMIN pueden acceder al panel /administracion.
+
+8. Panel de administración
+
+Incluye:
+
+Creación de productos
+
+Eliminación de productos
+
+Creación de categorías
+
+Creación de características
+
+Listado de productos y características
+
+Acceso bloqueado en móvil (según consigna)
+
+9. Documentación de Sprint
+
+En la carpeta /docs se encuentran:
+
+sprint1-documentacion.md
+
+sprint2-bitacora.md
+
+10. Instalación rápida (TL;DR)
 
 Backend:
-- Java 17  
-- Spring Boot  
-- Spring Web  
-- Spring Data JPA  
-- Base de datos H2 o MySQL  
 
-Infraestructura:
-- Git / GitHub  
-- Arquitectura REST  
-- Proyecto organizado en carpetas /frontend y /backend  
-
----------------------------------------------------------
-
-## Funcionalidades implementadas en el Sprint 1
-
-User Stories completadas:
-
-1. Header del sitio (US #1):  
-   Header fijo, responsive, con logo, lema y botones de sesión.
-
-2. Main con secciones (US #2):  
-   Secciones de buscador (maquetado), categorías y recomendaciones.
-
-3. Registrar producto (US #3):  
-   Formulario en Administración, validación de nombre único, guardado en BD.
-
-4. Productos aleatorios (US #4):  
-   Se muestran hasta 10 productos aleatorios en la sección “Recomendaciones”.
-
-5. Detalle del producto (US #5):  
-   Se visualiza título, botón volver, descripción y layout definido.
-
-6. Galería de imágenes (US #6):  
-   Una imagen principal y cuatro imágenes pequeñas. Botón “Ver más”.
-
-7. Footer del sitio (US #7):  
-   Footer responsive, con año y copyright.
-
-8. Paginación (US #8):  
-   Lista paginada de todos los servicios, con botones Inicio/Anterior/Siguiente.
-
-9. Panel de administración (US #9):  
-   Acceso desde /administración, solo desktop, incluye menú de funciones.
-
-10. Listar productos (US #10):  
-    Tabla con ID, nombre y acciones.
-
-11. Eliminar producto (US #11):  
-    Eliminación con confirmación y refresco automático.
-
----------------------------------------------------------
-
-## Endpoints principales del backend
-
-GET     /api/products  
-GET     /api/products/random?limit=10  
-GET     /api/products/{id}  
-POST    /api/products  
-DELETE  /api/products/{id}  
-
----------------------------------------------------------
-
-## Estructura del repositorio
-
-/backend  
-  ├── Product.java  
-  ├── ProductRepository.java  
-  ├── ProductController.java  
-  └── ...  
-
-/frontend  
-  ├── src/components  
-  ├── src/pages  
-  ├── App.jsx  
-  ├── services/api.js  
-  └── ...  
-
-/docs  
-  ├── definicion-proyecto.pdf  
-  ├── bitacora-sprint1.pdf  
-  └── casos-de-prueba.xlsx  
-
----------------------------------------------------------
-
-## Testing – Sprint 1
-
-Se realizaron casos de prueba funcionales cubriendo:
-
-- Header  
-- Registro de producto  
-- Listado  
-- Eliminación  
-- Detalle  
-- Galería  
-- Paginación  
-- Footer  
-
-Los casos de prueba se encuentran en:  
-/docs/casos-de-prueba.xlsx
-
----------------------------------------------------------
-
-## Documentación del Sprint
-
-Toda la documentación solicitada se incluye en la carpeta `/docs`, conteniendo:
-
-- Definición del proyecto  
-- Identidad visual  
-- Bitácora  
-- Casos de prueba  
-
----------------------------------------------------------
-
-## Cómo correr el proyecto
-
-Backend:
-cd backend  
-mvn spring-boot:run  
+Ejecutar BackendApplication
 
 Frontend:
-cd frontend  
-npm install  
-npm run dev  
 
-Acceso:
-http://localhost:5173/
-
----------------------------------------------------------
-
-## Autora
-
-Erika Cáceres  
-Certified Tech Developer – Digital House  
-Córdoba, Argentina
-
----------------------------------------------------------
-
-## Estado del proyecto
-
-Sprint 1 COMPLETADO  
-Listo para avanzar al Sprint 2.
+npm install
+npm run dev
 
 
+Abrir navegador en:
+
+Frontend: http://localhost:5173
+
+Backend: http://localhost:8080
