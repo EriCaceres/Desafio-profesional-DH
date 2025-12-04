@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { api } from "../services/api";
+import BookingCalendar from "../components/BookingCalendar";
 
 export default function ProductDetail() {
   const { id } = useParams();
@@ -39,7 +40,9 @@ export default function ProductDetail() {
     return (
       <main className="pt-16 bg-gray-100 min-h-screen pb-10">
         <div className="max-w-4xl mx-auto px-4 space-y-3 mt-4">
-          <p className="text-sm text-red-600">{err || "Servicio no encontrado."}</p>
+          <p className="text-sm text-red-600">
+            {err || "Servicio no encontrado."}
+          </p>
           <Link to="/" className="text-sm text-blue-600 hover:underline">
             Volver al inicio
           </Link>
@@ -48,7 +51,8 @@ export default function ProductDetail() {
     );
   }
 
-  const hasFeatures = Array.isArray(product.features) && product.features.length > 0;
+  const hasFeatures =
+    Array.isArray(product.features) && product.features.length > 0;
 
   return (
     <main className="pt-16 bg-gray-100 min-h-screen pb-10">
@@ -57,12 +61,13 @@ export default function ProductDetail() {
           ← Volver al inicio
         </Link>
 
-        <section className="bg-white rounded shadow p-5 space-y-3">
+        <section className="bg-white rounded shadow p-5 space-y-4">
           <div className="flex flex-col gap-1">
             <h1 className="text-2xl font-bold">{product.name}</h1>
             {product.category && (
               <p className="text-sm text-gray-600">
-                Categoría: <span className="font-medium">{product.category.name}</span>
+                Categoría:{" "}
+                <span className="font-medium">{product.category.name}</span>
               </p>
             )}
           </div>
@@ -85,6 +90,10 @@ export default function ProductDetail() {
           </div>
         </section>
 
+        {/* 🔥 Calendario de disponibilidad */}
+        <BookingCalendar productId={product.id} />
+
+        {/* Características */}
         {hasFeatures && (
           <section className="bg-white rounded shadow p-5 space-y-3">
             <h2 className="text-lg font-semibold">Incluye</h2>
@@ -105,5 +114,6 @@ export default function ProductDetail() {
     </main>
   );
 }
+
 
 
