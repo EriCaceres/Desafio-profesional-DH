@@ -3,6 +3,7 @@ import { DateRange } from "react-date-range";
 import { api } from "../services/api";
 import "react-date-range/dist/styles.css";
 import "react-date-range/dist/theme/default.css";
+import "../styles/BookingCalendar.css";
 
 export default function BookingCalendar({ productId }) {
   const [bookings, setBookings] = useState([]);
@@ -27,21 +28,26 @@ export default function BookingCalendar({ productId }) {
     load();
   }, [productId]);
 
-  const disabledDates = bookings
-    .filter((b) => !!b.date)
-    .map((b) => new Date(b.date));
+  const disabledDates =
+    bookings?.filter((b) => !!b.date).map((b) => new Date(b.date)) || [];
 
   const handleChange = (item) => {
-    setRange([item.selection]);
+    const newRange = [item.selection];
+    setRange(newRange);
+
+    // 👉 Guardamos el rango en localStorage para usarlo en BookingForm
+    const selection = newRange[0];
+    localStorage.setItem(
+      "selectedBookingRange",
+      JSON.stringify({
+        startDate: selection.startDate,
+        endDate: selection.endDate,
+      })
+    );
   };
 
   return (
-    <section className="bg-white rounded shadow p-5 space-y-3">
-      <h2 className="text-lg font-semibold">Disponibilidad</h2>
-      <p className="text-sm text-gray-600">
-        Seleccioná un rango de fechas para tu reserva. Las fechas ocupadas aparecen bloqueadas.
-      </p>
-
+    <div className="bc">
       <DateRange
         ranges={range}
         onChange={handleChange}
@@ -49,7 +55,9 @@ export default function BookingCalendar({ productId }) {
         minDate={new Date()}
         moveRangeOnFirstSelection={false}
       />
-    </section>
+    </div>
   );
 }
+
+
 

@@ -1,31 +1,30 @@
 package com.dgcars.backend.product;
 
-import jakarta.persistence.*;
-import com.dgcars.backend.feature.Feature;
 import com.dgcars.backend.category.Category;
+import com.dgcars.backend.feature.Feature;
+import jakarta.persistence.*;
+
 import java.util.HashSet;
 import java.util.Set;
 
 @Entity
-@Table(
-        name = "products",
-        uniqueConstraints = @UniqueConstraint(columnNames = "name")
-)
+@Table(name = "products")
 public class Product {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true, length = 120)
     private String name;
-
-    @Column(columnDefinition = "TEXT")
     private String description;
 
+    @Column(name = "duration_min")
     private Integer durationMin;
+
+    @Column(name = "price_from")
     private Integer priceFrom;
 
+    // Por ahora no usamos features, pero dejamos la relación lista
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "product_features",
@@ -38,7 +37,8 @@ public class Product {
     @JoinColumn(name = "category_id")
     private Category category;
 
-    public Product() {}
+    public Product() {
+    }
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -56,6 +56,7 @@ public class Product {
     public void setPriceFrom(Integer priceFrom) { this.priceFrom = priceFrom; }
 
     public Set<Feature> getFeatures() { return features; }
+    public void setFeatures(Set<Feature> features) { this.features = features; }
 
     public Category getCategory() { return category; }
     public void setCategory(Category category) { this.category = category; }

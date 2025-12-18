@@ -1,0 +1,23 @@
+/* Contenedor del calendario */
+.bc {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;           /* no deja que se genere scroll horizontal */
+}
+
+/* Forzar a todo react-date-range a respetar el ancho del contenedor */
+.bc .rdrDateRangeWrapper,
+.bc .rdrCalendarWrapper,
+.bc .rdrMonths,
+.bc .rdrMonth {
+  max-width: 100% !important;
+  width: 100% !important;
+  box-sizing: border-box;
+}
+
+/* Ocultar el panel lateral de rangos (que a veces agrega ancho extra) */
+.bc .rdrDefinedRangesWrapper {
+  display: none !important;
+}
+
+

@@ -1,0 +1,177 @@
+.bk {
+  background: #f3f4f6;
+  min-height: 100vh;
+  padding-top: 80px;
+  padding-bottom: 40px;
+}
+
+.bk__container {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
+.bk__container--center {
+  margin-top: 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.bk__top-bar {
+  margin-bottom: 16px;
+}
+
+.bk__link-back {
+  font-size: 0.85rem;
+  color: #2563eb;
+  text-decoration: none;
+}
+
+.bk__link-back:hover {
+  text-decoration: underline;
+}
+
+/* Layout principal */
+.bk__layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.2fr);
+  gap: 24px;
+}
+
+/* Resumen servicio */
+.bk__summary {
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 18px 20px;
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.06);
+}
+
+.bk__section-title {
+  font-size: 1rem;
+  margin-bottom: 6px;
+  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 4px;
+}
+
+.bk__service-name {
+  font-weight: 600;
+  margin-top: 8px;
+}
+
+.bk__service-desc {
+  font-size: 0.9rem;
+  color: #4b5563;
+  margin-top: 4px;
+}
+
+.bk__service-meta {
+  list-style: none;
+  padding: 0;
+  margin: 10px 0 0;
+  font-size: 0.85rem;
+  color: #374151;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* Formulario */
+.bk__form-card {
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 20px 22px;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+}
+
+.bk__title {
+  font-size: 1.4rem;
+  margin-bottom: 4px;
+}
+
+.bk__subtitle {
+  font-size: 0.85rem;
+  color: #6b7280;
+  margin-bottom: 12px;
+}
+
+.bk__form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.bk__field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.bk__field label {
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.bk__field input,
+.bk__field textarea {
+  border-radius: 10px;
+  border: 1px solid #d1d5db;
+  padding: 8px 10px;
+  font-size: 0.9rem;
+  outline: none;
+}
+
+.bk__field input:focus,
+.bk__field textarea:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 1px rgba(37, 99, 235, 0.2);
+}
+
+/* Botón */
+.bk__btn-primary {
+  margin-top: 8px;
+  border: none;
+  border-radius: 999px;
+  padding: 10px 16px;
+  font-size: 0.9rem;
+  background: #2563eb;
+  color: #ffffff;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.bk__btn-primary:hover {
+  background: #1d4ed8;
+}
+
+.bk__btn-primary:disabled {
+  opacity: 0.7;
+  cursor: default;
+}
+
+/* Mensajes */
+.bk__info {
+  font-size: 0.9rem;
+  color: #4b5563;
+}
+
+.bk__error {
+  font-size: 0.9rem;
+  color: #b91c1c;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .bk__container {
+    padding: 0 12px;
+  }
+
+  .bk__layout {
+    grid-template-columns: 1fr;
+  }
+
+  .bk__form-card {
+    margin-top: 8px;
+  }
+}

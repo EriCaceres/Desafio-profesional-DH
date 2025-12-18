@@ -1,13 +1,17 @@
 import { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
 import { api } from "../services/api";
 import BookingCalendar from "../components/BookingCalendar";
+import "../styles/ProductDetail.css";
+import { useNavigate, useParams, Link } from "react-router-dom";
+
 
 export default function ProductDetail() {
   const { id } = useParams();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState("");
+  const navigate = useNavigate();
+
 
   useEffect(() => {
     const load = async () => {
@@ -26,11 +30,15 @@ export default function ProductDetail() {
     load();
   }, [id]);
 
+  const handleReserveClick = () => {
+    alert("El flujo de reserva se implementa en el Sprint 4 😊");
+  };
+
   if (loading) {
     return (
-      <main className="pt-16 bg-gray-100 min-h-screen pb-10">
-        <div className="max-w-4xl mx-auto px-4">
-          <p className="text-sm text-gray-600 mt-4">Cargando servicio...</p>
+      <main className="pd">
+        <div className="pd__container">
+          <p className="pd__info">Cargando servicio...</p>
         </div>
       </main>
     );
@@ -38,13 +46,11 @@ export default function ProductDetail() {
 
   if (err || !product) {
     return (
-      <main className="pt-16 bg-gray-100 min-h-screen pb-10">
-        <div className="max-w-4xl mx-auto px-4 space-y-3 mt-4">
-          <p className="text-sm text-red-600">
-            {err || "Servicio no encontrado."}
-          </p>
-          <Link to="/" className="text-sm text-blue-600 hover:underline">
-            Volver al inicio
+      <main className="pd">
+        <div className="pd__container pd__container--center">
+          <p className="pd__error">{err || "Servicio no encontrado."}</p>
+          <Link to="/" className="pd__link-back">
+            ← Volver al inicio
           </Link>
         </div>
       </main>
@@ -55,65 +61,105 @@ export default function ProductDetail() {
     Array.isArray(product.features) && product.features.length > 0;
 
   return (
-    <main className="pt-16 bg-gray-100 min-h-screen pb-10">
-      <div className="max-w-4xl mx-auto px-4 space-y-6 mt-4">
-        <Link to="/" className="text-sm text-blue-600 hover:underline">
-          ← Volver al inicio
-        </Link>
+    <main className="pd">
+      <div className="pd__container">
+        {/* Volver */}
+        <div className="pd__top-bar">
+          <Link to="/" className="pd__link-back">
+            ← Volver al inicio
+          </Link>
+        </div>
 
-        <section className="bg-white rounded shadow p-5 space-y-4">
-          <div className="flex flex-col gap-1">
-            <h1 className="text-2xl font-bold">{product.name}</h1>
-            {product.category && (
-              <p className="text-sm text-gray-600">
-                Categoría:{" "}
-                <span className="font-medium">{product.category.name}</span>
-              </p>
-            )}
-          </div>
-
-          {product.description && (
-            <p className="text-sm text-gray-700">{product.description}</p>
-          )}
-
-          <div className="flex flex-wrap gap-4 text-sm text-gray-700 mt-2">
+        {/* HEADER */}
+        <section className="pd__header">
+          <span className="pd__badge">Servicio de detailing</span>
+          <h1 className="pd__title">{product.name}</h1>
+          <div className="pd__meta">
             {product.durationMin != null && (
-              <span className="inline-flex items-center gap-1">
-                ⏱ {product.durationMin} min
-              </span>
+              <span>⏱ {product.durationMin} min</span>
             )}
             {product.priceFrom != null && (
-              <span className="inline-flex items-center gap-1">
-                💲 Desde ${product.priceFrom}
-              </span>
+              <span>💲 Desde ${product.priceFrom}</span>
             )}
           </div>
         </section>
 
-        {/* 🔥 Calendario de disponibilidad */}
-        <BookingCalendar productId={product.id} />
+        {/* CONTENIDO: dos columnas en desktop, una en mobile */}
+        <section className="pd__content">
+          {/* Columna izquierda */}
+          <div className="pd__left">
+            <section className="pd__card">
+              <h2 className="pd__card-title">Descripción del servicio</h2>
+              <p className="pd__card-text">{product.description}</p>
+            </section>
+            {/* RESEÑAS (mock por ahora) */}
+            <section className="pd__card">
+              <h2 className="pd__card-title">Reseñas</h2>
 
-        {/* Características */}
-        {hasFeatures && (
-          <section className="bg-white rounded shadow p-5 space-y-3">
-            <h2 className="text-lg font-semibold">Incluye</h2>
-            <ul className="flex flex-wrap gap-2">
-              {product.features.map((f) => (
-                <li
-                  key={f.id}
-                  className="border rounded-full px-3 py-1 text-sm flex items-center gap-2"
-                >
-                  <span>{f.icon}</span>
-                  <span>{f.name}</span>
-                </li>
-              ))}
-            </ul>
-          </section>
-        )}
+              <article className="pd__review-card">
+                <div className="pd__review-header">
+                  <span className="pd__review-user">Cliente frecuente</span>
+                  <span className="pd__review-date">Nov 2025</span>
+                </div>
+                <div className="pd__review-rating">★★★★★</div>
+                <p className="pd__review-text">
+                  El auto quedó impecable, superaron mis expectativas.
+                </p>
+              </article>
+
+              <article className="pd__review-card">
+                <div className="pd__review-header">
+                  <span className="pd__review-user">Nueva usuaria</span>
+                  <span className="pd__review-date">Oct 2025</span>
+                </div>
+                <div className="pd__review-rating">★★★★☆</div>
+                <p className="pd__review-text">
+                  Muy buen servicio, volvería sin dudas.
+                </p>
+              </article>
+            </section>
+
+
+            {hasFeatures && (
+              <section className="pd__card">
+                <h2 className="pd__card-title">Incluye</h2>
+                <ul className="pd__features">
+                  {product.features.map((f) => (
+                    <li key={f.id} className="pd__feature-item">
+                      <span className="pd__feature-dot">•</span>
+                      <span>{f.name}</span>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            )}
+          </div>
+
+          {/* Columna derecha */}
+          <aside className="pd__right">
+            <section className="pd__card pd__card--sticky">
+              <h2 className="pd__card-title">Disponibilidad</h2>
+              <p className="pd__card-text">
+                Seleccioná el rango de fechas para ver los turnos disponibles.
+              </p>
+              <div className="pd__calendar-wrapper">
+                <BookingCalendar productId={product.id} />
+              </div>
+              <button
+                type="button"
+                className="pd__btn-reserve"
+                onClick={() => navigate(`/products/${product.id}/booking`)}
+              >
+                Reservar este servicio
+              </button>
+            </section>
+          </aside>
+        </section>
       </div>
     </main>
   );
 }
+
 
 
 

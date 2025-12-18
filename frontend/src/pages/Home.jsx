@@ -1,16 +1,24 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { api } from "../services/api";
 import { DateRange } from "react-date-range";
-import { format } from "date-fns";
 import "react-date-range/dist/styles.css";
 import "react-date-range/dist/theme/default.css";
 
+import { api } from "../services/api";
+import ProductCard from "../components/ProductCard";
+import "../styles/Home.css";
+
 export default function Home() {
   const [products, setProducts] = useState([]);
-  const [filtered, setFiltered] = useState([]);
+  const [categories, setCategories] = useState([]);
+
+  const [selectedCategoryId, setSelectedCategoryId] = useState(null);
+
   const [loading, setLoading] = useState(true);
-  const [err, setErr] = useState("");
+  const [errorMsg, setErrorMsg] = useState("");
+
+  const [searchError, setSearchError] = useState("");
+  const [searching, setSearching] = useState(false);
 
   const [range, setRange] = useState([
     {
@@ -20,160 +28,157 @@ export default function Home() {
     },
   ]);
 
-  const [searchActive, setSearchActive] = useState(false);
-
-  // Cargar productos iniciales
+  // Carga inicial: categorías + productos
   useEffect(() => {
+    let mounted = true;
+
     const load = async () => {
+      setLoading(true);
+      setErrorMsg("");
+
       try {
-        setLoading(true);
-        const { data } = await api.get("/api/products");
-        setProducts(data || []);
-        setFiltered(data || []);
-        setErr("");
+        const [catRes, prodRes] = await Promise.all([
+          api.get("/api/categories"),
+          api.get("/api/products"),
+        ]);
+
+        if (!mounted) return;
+
+        const cats = Array.isArray(catRes.data) ? catRes.data : [];
+        const prods = Array.isArray(prodRes.data) ? prodRes.data : [];
+
+        setCategories(cats);
+        setProducts(prods);
       } catch (e) {
-        console.error(e);
-        setErr("No se pudieron cargar los servicios.");
+        if (!mounted) return;
+        setErrorMsg("No se pudieron cargar los servicios. Probá de nuevo más tarde.");
       } finally {
+        if (!mounted) return;
         setLoading(false);
       }
     };
+
     load();
+    return () => {
+      mounted = false;
+    };
   }, []);
 
-  const handleRangeChange = (item) => {
-    setRange([item.selection]);
-  };
+  // Lista “visible” según categoría seleccionada
+  const visibleProducts = useMemo(() => {
+    let base = products;
 
-  const handleSearch = async () => {
+    if (selectedCategoryId) {
+      base = base.filter((p) => p?.category?.id === selectedCategoryId);
+    }
+
+    // Sprint/Home: recomendados (máximo 10)
+    return base.slice(0, 10);
+  }, [products, selectedCategoryId]);
+
+  const handleSearchAvailability = async () => {
+    setSearching(true);
+    setSearchError("");
+
     try {
-      const start = format(range[0].startDate, "yyyy-MM-dd");
-      const end = format(range[0].endDate, "yyyy-MM-dd");
+      const from = range[0].startDate.toISOString().slice(0, 10);
+      const to = range[0].endDate.toISOString().slice(0, 10);
 
-      const { data } = await api.get("/api/products/available", {
-        params: {
-          startDate: start,
-          endDate: end,
-        },
-      });
+      // Endpoint esperado (si tu backend lo tiene así)
+      // Si tu endpoint real es otro, decime cuál es y lo ajustamos.
+      const res = await api.get(`/api/products/available?from=${from}&to=${to}`);
+      const data = Array.isArray(res.data) ? res.data : [];
 
-      setFiltered(data || []);
-      setSearchActive(true);
+      setProducts(data);
+
+      // Importante: al buscar disponibilidad, normalmente conviene resetear categoría
+      // porque si no, te puede dejar “1 solo” por el filtro anterior.
+      setSelectedCategoryId(null);
     } catch (e) {
-      console.error(e);
-      setErr("No se pudo realizar la búsqueda.");
+      setSearchError("No se pudo buscar disponibilidad. Probá de nuevo.");
+    } finally {
+      setSearching(false);
     }
   };
 
-  const clearSearch = () => {
-    setFiltered(products);
-    setSearchActive(false);
-  };
-
   return (
-    <main className="pt-16 bg-gray-100 min-h-screen pb-10">
-      <div className="max-w-6xl mx-auto px-4 space-y-8 mt-4">
-        {/* Bloque de búsqueda con rango de fechas (US #22) */}
-        <section className="bg-white rounded shadow p-5 grid gap-6 md:grid-cols-2">
-          <div className="space-y-3">
-            <h1 className="text-2xl font-bold">Buscá tu turno</h1>
-            <p className="text-sm text-gray-600">
-              Elegí el rango de fechas en el que querés reservar y te mostramos solo los servicios disponibles.
-            </p>
-
-            <div className="flex flex-wrap gap-3 items-center">
-              <button
-                onClick={handleSearch}
-                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm"
-              >
-                Buscar disponibilidad
-              </button>
-
-              {searchActive && (
-                <button
-                  onClick={clearSearch}
-                  className="px-3 py-2 border rounded text-sm text-gray-700 hover:bg-gray-100"
-                >
-                  Limpiar búsqueda
-                </button>
-              )}
-            </div>
-          </div>
-
-          <div className="justify-self-end">
-            <DateRange
-              ranges={range}
-              onChange={handleRangeChange}
-              minDate={new Date()}
-              moveRangeOnFirstSelection={false}
-            />
-          </div>
-        </section>
-
-        {/* Mensajes de estado */}
-        {loading && <p className="text-sm text-gray-600">Cargando servicios...</p>}
-        {err && <p className="text-sm text-red-600">{err}</p>}
-
-        {/* Resultados de productos */}
-        <section className="space-y-3">
-          <div className="flex justify-between items-center">
-            <h2 className="text-xl font-semibold">
-              {searchActive ? "Resultados de la búsqueda" : "Servicios recomendados"}
-            </h2>
-            <p className="text-xs text-gray-500">
-              Mostrando {filtered.length} servicio(s)
-            </p>
-          </div>
-
-          <div className="grid gap-4 md:grid-cols-3">
-            {filtered.map((p) => (
-              <article
-                key={p.id}
-                className="bg-white rounded shadow p-4 flex flex-col justify-between"
-              >
-                <div className="space-y-2">
-                  <h3 className="font-semibold text-lg truncate">{p.name}</h3>
-                  {p.category && (
-                    <p className="text-xs text-gray-500">
-                      {p.category.name}
-                    </p>
-                  )}
-                  {p.description && (
-                    <p className="text-xs text-gray-600 line-clamp-3">
-                      {p.description}
-                    </p>
-                  )}
-                </div>
-
-                <div className="mt-3 flex items-center justify-between text-sm text-gray-700">
-                  {p.durationMin != null && (
-                    <span>⏱ {p.durationMin} min</span>
-                  )}
-                  {p.priceFrom != null && (
-                    <span>💲 Desde ${p.priceFrom}</span>
-                  )}
-                </div>
-
-                <div className="mt-4">
-                  <Link
-                    to={`/product/${p.id}`}
-                    className="inline-block w-full text-center px-3 py-2 bg-blue-600 text-white text-sm rounded hover:bg-blue-700"
-                  >
-                    Ver detalle
-                  </Link>
-                </div>
-              </article>
-            ))}
-
-            {!loading && filtered.length === 0 && (
-              <p className="text-sm text-gray-600">
-                No encontramos servicios disponibles en ese rango de fechas.
-              </p>
-            )}
-          </div>
-        </section>
+    <div className="home">
+      {/* Header simple (si ya tenés uno global, podés eliminar esto) */}
+      <div className="home__top">
+        <h2>Reservá tu turno de detailing</h2>
+        <div className="home__auth">
+          <Link to="/register">Crear cuenta</Link>
+          <Link to="/login">Iniciar sesión</Link>
+        </div>
       </div>
-    </main>
+
+      <section className="home__calendar">
+        <DateRange
+          ranges={range}
+          onChange={(item) => setRange([item.selection])}
+          moveRangeOnFirstSelection={false}
+        />
+
+        <button
+          className="btn-primary"
+          onClick={handleSearchAvailability}
+          disabled={searching}
+        >
+          {searching ? "Buscando..." : "Buscar disponibilidad"}
+        </button>
+
+        {searchError && <p className="error">{searchError}</p>}
+      </section>
+
+      <section className="home__categories">
+        <h3>Categorías</h3>
+
+        {loading ? (
+          <p>Cargando categorías...</p>
+        ) : categories.length === 0 ? (
+          <p>No hay categorías configuradas</p>
+        ) : (
+          <div className="home__categoryList">
+            <button
+              className={`chip ${selectedCategoryId === null ? "chip--active" : ""}`}
+              onClick={() => setSelectedCategoryId(null)}
+            >
+              Todas
+            </button>
+
+            {categories.map((c) => (
+              <button
+                key={c.id}
+                className={`chip ${selectedCategoryId === c.id ? "chip--active" : ""}`}
+                onClick={() => setSelectedCategoryId(c.id)}
+              >
+                {c.name}
+              </button>
+            ))}
+          </div>
+        )}
+      </section>
+
+      <section className="home__recommended">
+        <div className="home__recommendedHeader">
+          <h3>Servicios recomendados</h3>
+          <span>Mostrando {visibleProducts.length} servicio(s)</span>
+        </div>
+
+        {errorMsg && <p className="error">{errorMsg}</p>}
+
+        {!loading && !errorMsg && visibleProducts.length === 0 && (
+          <p>No hay servicios para mostrar.</p>
+        )}
+
+        <div className="home__grid">
+          {visibleProducts.map((p) => (
+            <ProductCard key={p.id} product={p} />
+          ))}
+        </div>
+      </section>
+
+      <footer className="home__footer">© 2025 ShineLab. Todos los derechos reservados.</footer>
+    </div>
   );
 }
-
