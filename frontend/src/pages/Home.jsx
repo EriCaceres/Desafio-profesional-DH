@@ -9,9 +9,12 @@ import ProductCard from "../components/ProductCard";
 import "../styles/Home.css";
 
 export default function Home() {
-  const [products, setProducts] = useState([]);
-  const [categories, setCategories] = useState([]);
+  const [searchText, setSearchText] = useState("");
 
+  const [allProducts, setAllProducts] = useState([]); // BASE
+  const [products, setProducts] = useState([]);       // VISTA
+
+  const [categories, setCategories] = useState([]);
   const [selectedCategoryId, setSelectedCategoryId] = useState(null);
 
   const [loading, setLoading] = useState(true);
@@ -19,6 +22,8 @@ export default function Home() {
 
   const [searchError, setSearchError] = useState("");
   const [searching, setSearching] = useState(false);
+
+  const [showCalendar, setShowCalendar] = useState(false);
 
   const [range, setRange] = useState([
     {
@@ -28,14 +33,14 @@ export default function Home() {
     },
   ]);
 
-  // Carga inicial: categorías + productos
+  const formatDate = (d) =>
+    d ? new Date(d).toLocaleDateString("es-AR") : "";
+
+  // CARGA INICIAL
   useEffect(() => {
     let mounted = true;
 
     const load = async () => {
-      setLoading(true);
-      setErrorMsg("");
-
       try {
         const [catRes, prodRes] = await Promise.all([
           api.get("/api/categories"),
@@ -48,10 +53,11 @@ export default function Home() {
         const prods = Array.isArray(prodRes.data) ? prodRes.data : [];
 
         setCategories(cats);
+        setAllProducts(prods);
         setProducts(prods);
-      } catch (e) {
+      } catch {
         if (!mounted) return;
-        setErrorMsg("No se pudieron cargar los servicios. Probá de nuevo más tarde.");
+        setErrorMsg("No se pudieron cargar los servicios.");
       } finally {
         if (!mounted) return;
         setLoading(false);
@@ -59,23 +65,25 @@ export default function Home() {
     };
 
     load();
-    return () => {
-      mounted = false;
-    };
+    return () => (mounted = false);
   }, []);
 
-  // Lista “visible” según categoría seleccionada
+  // FILTRO POR CATEGORÍA + LIMITE 10
   const visibleProducts = useMemo(() => {
     let base = products;
 
     if (selectedCategoryId) {
-      base = base.filter((p) => p?.category?.id === selectedCategoryId);
+      base = base.filter(
+        (p) =>
+          p?.category?.id === selectedCategoryId ||
+          p?.categoryId === selectedCategoryId
+      );
     }
 
-    // Sprint/Home: recomendados (máximo 10)
     return base.slice(0, 10);
   }, [products, selectedCategoryId]);
 
+  // BUSQUEDA
   const handleSearchAvailability = async () => {
     setSearching(true);
     setSearchError("");
@@ -84,101 +92,130 @@ export default function Home() {
       const from = range[0].startDate.toISOString().slice(0, 10);
       const to = range[0].endDate.toISOString().slice(0, 10);
 
-      // Endpoint esperado (si tu backend lo tiene así)
-      // Si tu endpoint real es otro, decime cuál es y lo ajustamos.
-      const res = await api.get(`/api/products/available?from=${from}&to=${to}`);
+      const url = searchText.trim()
+        ? `/api/products/search?query=${encodeURIComponent(searchText)}`
+        : `/api/products/available?startDate=${from}&endDate=${to}`;
+
+      const res = await api.get(url);
       const data = Array.isArray(res.data) ? res.data : [];
 
       setProducts(data);
-
-      // Importante: al buscar disponibilidad, normalmente conviene resetear categoría
-      // porque si no, te puede dejar “1 solo” por el filtro anterior.
       setSelectedCategoryId(null);
-    } catch (e) {
-      setSearchError("No se pudo buscar disponibilidad. Probá de nuevo.");
+      setShowCalendar(false);
+    } catch {
+      setSearchError("No se pudo realizar la búsqueda.");
     } finally {
       setSearching(false);
     }
   };
 
+  // RESET
+  const resetFilters = () => {
+    setProducts(allProducts);
+    setSelectedCategoryId(null);
+    setSearchText("");
+    setSearchError("");
+  };
+
   return (
     <div className="home">
-      {/* Header simple (si ya tenés uno global, podés eliminar esto) */}
       <div className="home__top">
-        <h2>Reservá tu turno de detailing</h2>
-        <div className="home__auth">
-          <Link to="/register">Crear cuenta</Link>
-          <Link to="/login">Iniciar sesión</Link>
+        <div className="home__top-inner">
+          <h2 className="home__brand">ShineLab</h2>
+          <div className="home__auth">
+            <Link to="/register">Crear cuenta</Link>
+            <Link to="/login">Iniciar sesión</Link>
+          </div>
         </div>
       </div>
 
-      <section className="home__calendar">
-        <DateRange
-          ranges={range}
-          onChange={(item) => setRange([item.selection])}
-          moveRangeOnFirstSelection={false}
-        />
+      <div className="home__container">
+        {/* BUSCADOR */}
+        <section className="home__search">
+          <h1>Reservá tu turno de detailing</h1>
+          <p>Buscá por servicio o por disponibilidad.</p>
 
-        <button
-          className="btn-primary"
-          onClick={handleSearchAvailability}
-          disabled={searching}
-        >
-          {searching ? "Buscando..." : "Buscar disponibilidad"}
-        </button>
+          <input
+            className="search-input"
+            placeholder="Buscar servicio…"
+            value={searchText}
+            onChange={(e) => setSearchText(e.target.value)}
+          />
 
-        {searchError && <p className="error">{searchError}</p>}
-      </section>
+          <div className="search__controls">
+            <button
+              className="date-input"
+              onClick={() => setShowCalendar((v) => !v)}
+            >
+              {formatDate(range[0].startDate)} -{" "}
+              {formatDate(range[0].endDate)}
+            </button>
 
-      <section className="home__categories">
-        <h3>Categorías</h3>
+            <button className="btn-primary" onClick={handleSearchAvailability}>
+              Buscar
+            </button>
 
-        {loading ? (
-          <p>Cargando categorías...</p>
-        ) : categories.length === 0 ? (
-          <p>No hay categorías configuradas</p>
-        ) : (
+            <button className="btn-secondary" onClick={resetFilters}>
+              Limpiar
+            </button>
+          </div>
+
+          {showCalendar && (
+            <div className="calendar-popover">
+              <DateRange
+                ranges={range}
+                onChange={(item) => setRange([item.selection])}
+                minDate={new Date()}
+              />
+            </div>
+          )}
+
+          {searchError && <p className="error">{searchError}</p>}
+        </section>
+
+        {/* CATEGORIAS */}
+        <section className="home__categories">
+          <h3>Categorías</h3>
           <div className="home__categoryList">
             <button
-              className={`chip ${selectedCategoryId === null ? "chip--active" : ""}`}
+              className={!selectedCategoryId ? "chip chip--active" : "chip"}
               onClick={() => setSelectedCategoryId(null)}
             >
               Todas
             </button>
-
             {categories.map((c) => (
               <button
                 key={c.id}
-                className={`chip ${selectedCategoryId === c.id ? "chip--active" : ""}`}
+                className={
+                  selectedCategoryId === c.id ? "chip chip--active" : "chip"
+                }
                 onClick={() => setSelectedCategoryId(c.id)}
               >
                 {c.name}
               </button>
             ))}
           </div>
-        )}
-      </section>
+        </section>
 
-      <section className="home__recommended">
-        <div className="home__recommendedHeader">
+        {/* RESULTADOS */}
+        <section className="home__recommended">
           <h3>Servicios recomendados</h3>
-          <span>Mostrando {visibleProducts.length} servicio(s)</span>
-        </div>
 
-        {errorMsg && <p className="error">{errorMsg}</p>}
+          {visibleProducts.length === 0 ? (
+            <p>No hay servicios para mostrar.</p>
+          ) : (
+            <div className="home__grid">
+              {visibleProducts.map((p) => (
+                <ProductCard key={p.id} product={p} />
+              ))}
+            </div>
+          )}
+        </section>
+      </div>
 
-        {!loading && !errorMsg && visibleProducts.length === 0 && (
-          <p>No hay servicios para mostrar.</p>
-        )}
-
-        <div className="home__grid">
-          {visibleProducts.map((p) => (
-            <ProductCard key={p.id} product={p} />
-          ))}
-        </div>
-      </section>
-
-      <footer className="home__footer">© 2025 ShineLab. Todos los derechos reservados.</footer>
+      <footer className="home__footer">
+      </footer>
     </div>
   );
 }
+

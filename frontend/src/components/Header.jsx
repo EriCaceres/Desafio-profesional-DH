@@ -5,7 +5,6 @@ export default function Header() {
   const [user, setUser] = useState(null);
   const navigate = useNavigate();
 
-  // leer usuario desde localStorage al cargar
   useEffect(() => {
     const stored = localStorage.getItem("user");
     if (stored) {
@@ -23,25 +22,23 @@ export default function Header() {
     navigate("/");
   };
 
-  // iniciales para el circulito
   const initials = user
-    ? `${(user.firstName || "").charAt(0)}${(user.lastName || "").charAt(0)}`
-        .toUpperCase()
+    ? `${(user.firstName || "").charAt(0)}${(user.lastName || "").charAt(0)}`.toUpperCase()
     : "";
 
-  // ¿es admin? (para el Sprint 2, cuando tengas rol ADMIN)
   const isAdmin =
-    user && Array.isArray(user.roles)
-      ? user.roles.some((r) => r.name === "ADMIN")
-      : false;
+    user && Array.isArray(user.roles) ? user.roles.some((r) => r.name === "ADMIN") : false;
 
   return (
-    <header className="fixed top-0 left-0 right-0 bg-white shadow z-50">
+    <header className="fixed top-0 left-0 right-0 bg-white border-b border-slate-200 z-50">
       <div className="max-w-7xl mx-auto flex items-center justify-between h-16 px-4 lg:px-8">
         {/* Logo + lema */}
-        <Link to="/" className="flex flex-col">
-          <span className="font-bold text-xl leading-tight">ShineLab</span>
-          <span className="text-xs text-gray-500">
+        <Link
+          to="/"
+          className="flex flex-col gap-0.5 no-underline text-slate-900 hover:text-slate-900"
+        >
+          <span className="font-extrabold text-xl leading-none">ShineLab</span>
+          <span className="text-xs text-slate-500 leading-none">
             Reservá tu turno de detailing
           </span>
         </Link>
@@ -52,37 +49,37 @@ export default function Header() {
             {isAdmin && (
               <Link
                 to="/administración"
-                className="text-sm text-blue-600 hover:underline"
+                className="text-sm font-semibold text-slate-700 hover:text-slate-900 hover:underline"
               >
                 Panel admin
               </Link>
             )}
 
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs">
+              <div className="w-8 h-8 rounded-full bg-orange-500 text-white flex items-center justify-center text-xs font-bold">
                 {initials || "U"}
               </div>
-              <span className="text-sm">
-                Hola, {user.firstName || "usuario"}
+              <span className="text-sm text-slate-700">
+                Hola, <span className="font-semibold">{user.firstName || "usuario"}</span>
               </span>
             </div>
 
             <button
               onClick={handleLogout}
-              className="border px-3 py-1 rounded text-sm"
+              className="border border-slate-300 px-3 py-1.5 rounded-md text-sm font-semibold text-slate-700 hover:bg-slate-50"
             >
               Cerrar sesión
             </button>
           </div>
         ) : (
           <div className="flex gap-2">
-            <Link to="/register">
-              <button className="border px-3 py-1 rounded text-sm">
+            <Link to="/register" className="no-underline">
+              <button className="border border-slate-300 px-3 py-1.5 rounded-md text-sm font-semibold text-slate-700 hover:bg-slate-50">
                 Crear cuenta
               </button>
             </Link>
-            <Link to="/login">
-              <button className="bg-blue-600 text-white px-3 py-1 rounded text-sm">
+            <Link to="/login" className="no-underline">
+              <button className="bg-orange-500 text-white px-3 py-1.5 rounded-md text-sm font-semibold hover:bg-orange-600">
                 Iniciar sesión
               </button>
             </Link>
@@ -92,4 +89,5 @@ export default function Header() {
     </header>
   );
 }
+
 

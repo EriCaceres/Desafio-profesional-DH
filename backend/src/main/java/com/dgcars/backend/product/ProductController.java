@@ -35,6 +35,21 @@ public class ProductController {
     public List<Product> list() {
         return productRepo.findAll();
     }
+    @GetMapping("/search")
+    public List<Product> search(@RequestParam String query) {
+        if (query == null || query.trim().isEmpty()) {
+            return productRepo.findAll();
+        }
+
+        String q = query.trim().toLowerCase();
+
+        return productRepo.findAll().stream()
+                .filter(p ->
+                        (p.getName() != null && p.getName().toLowerCase().contains(q)) ||
+                                (p.getDescription() != null && p.getDescription().toLowerCase().contains(q))
+                )
+                .toList();
+    }
 
     @GetMapping("/{id}")
     public Product get(@PathVariable Long id) {
