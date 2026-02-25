@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
 import { DateRange } from "react-date-range";
 import "react-date-range/dist/styles.css";
 import "react-date-range/dist/theme/default.css";
@@ -119,16 +118,6 @@ export default function Home() {
 
   return (
     <div className="home">
-      <div className="home__top">
-        <div className="home__top-inner">
-          <h2 className="home__brand">ShineLab</h2>
-          <div className="home__auth">
-            <Link to="/register">Crear cuenta</Link>
-            <Link to="/login">Iniciar sesión</Link>
-          </div>
-        </div>
-      </div>
-
       <div className="home__container">
         {/* BUSCADOR */}
         <section className="home__search">
