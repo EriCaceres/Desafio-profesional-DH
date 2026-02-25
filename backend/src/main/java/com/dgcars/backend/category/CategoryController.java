@@ -30,4 +30,13 @@ public class CategoryController {
         }
         return repo.save(c);
     }
+
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void delete(@PathVariable Long id) {
+        if (!repo.existsById(id)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Categoría no encontrada");
+        }
+        repo.deleteById(id);
+    }
 }

@@ -7,6 +7,7 @@ import ProductDetail from "./pages/ProductDetail";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import BookingForm from "./pages/BookingForm";
+import Favorites from "./pages/Favorites";
 
 export default function App() {
   return (
@@ -22,6 +23,7 @@ export default function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/products/:id/booking" element={<BookingForm />} />
+            <Route path="/favoritos" element={<Favorites />} />
           </Routes>
         </main>
 
@@ -30,4 +32,3 @@ export default function App() {
     </BrowserRouter>
   );
 }
-

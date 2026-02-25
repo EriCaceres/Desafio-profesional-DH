@@ -8,6 +8,7 @@ export default function BookingForm() {
   const navigate = useNavigate();
 
   const [product, setProduct] = useState(null);
+  const [user, setUser] = useState(null);
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
   const [notes, setNotes] = useState("");
@@ -16,7 +17,17 @@ export default function BookingForm() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
 
-  // Cargar datos del producto
+  // Cargar usuario desde localStorage
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem("user");
+      if (raw) setUser(JSON.parse(raw));
+    } catch {
+      setUser(null);
+    }
+  }, []);
+
+  // Cargar producto
   useEffect(() => {
     const load = async () => {
       try {
@@ -26,7 +37,7 @@ export default function BookingForm() {
         setError("");
       } catch (e) {
         console.error(e);
-        setError("No se pudo cargar el servicio.");
+        setError("No se pudo cargar el servicio. Intentá de nuevo más tarde.");
       } finally {
         setLoading(false);
       }
@@ -34,68 +45,62 @@ export default function BookingForm() {
     load();
   }, [id]);
 
-  // Intentar precargar fecha desde el calendario (localStorage)
+  // Precargar fecha desde el calendario (localStorage)
   useEffect(() => {
     try {
       const raw = localStorage.getItem("selectedBookingRange");
       if (!raw) return;
-
       const parsed = JSON.parse(raw);
       if (parsed?.startDate) {
-        const d = new Date(parsed.startDate);
-        // yyyy-mm-dd
-        const iso = d.toISOString().slice(0, 10);
-        setDate(iso);
+        setDate(new Date(parsed.startDate).toISOString().slice(0, 10));
       }
     } catch {
       // ignoramos si falla
     }
   }, []);
 
+  const getErrorMessage = (e) => {
+    const status = e.response?.status;
+    const msg    = e.response?.data?.message;
+
+    if (msg) return msg;
+    if (status === 400) return "Los datos ingresados no son válidos. Revisá la fecha y el horario.";
+    if (status === 401 || status === 403) return "Tu sesión expiró. Volvé a iniciar sesión.";
+    if (status === 409) return "Esa fecha y horario ya están reservados. Elegí otro turno.";
+    if (status >= 500) return "Error del servidor. Intentá de nuevo en unos minutos.";
+    return "No se pudo confirmar la reserva. Verificá tu conexión y probá de nuevo.";
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
 
-    if (!date || !time) {
-      setError("Seleccioná fecha y horario para la reserva.");
+    if (!user?.id) {
+      setError("Tenés que iniciar sesión para reservar un turno.");
+      return;
+    }
+    if (!date) {
+      setError("Seleccioná una fecha para la reserva.");
+      return;
+    }
+    if (!time) {
+      setError("Seleccioná un horario para la reserva.");
       return;
     }
 
     try {
       setSaving(true);
-
-let userId = null;
-try {
-  const rawUser = localStorage.getItem("user");
-  if (rawUser) {
-    const user = JSON.parse(rawUser);
-    userId = user.id;
-  }
-} catch (e) {
-  console.error("No se pudo leer el usuario de localStorage", e);
-}
-
-if (!userId) {
-  setError("Tenés que iniciar sesión para reservar un turno.");
-  setSaving(false);
-  return;
-}
-
-// Payload que espera el backend (BookingRequest)
-const payload = {
-  productId: Number(id),
-  userId,
-  date,
-  time,
-  notes,
-};
-
-await api.post("/api/bookings", payload);
-
+      await api.post("/api/bookings", {
+        productId: Number(id),
+        userId: user.id,
+        date,
+        time,
+        notes,
+      });
       setSuccess(true);
     } catch (e) {
       console.error(e);
-      setError("No se pudo confirmar la reserva. Probá de nuevo.");
+      setError(getErrorMessage(e));
     } finally {
       setSaving(false);
     }
@@ -111,38 +116,51 @@ await api.post("/api/bookings", payload);
     );
   }
 
-  if (error && !product && !success) {
+  if (error && !product) {
     return (
       <main className="bk">
         <div className="bk__container bk__container--center">
           <p className="bk__error">{error}</p>
-          <Link to="/" className="bk__link-back">
-            ← Volver al inicio
-          </Link>
+          <Link to="/" className="bk__link-back">← Volver al inicio</Link>
         </div>
       </main>
     );
   }
 
-  // Vista de éxito
+  // #32 — Página de confirmación
   if (success) {
     return (
       <main className="bk">
         <div className="bk__container bk__container--center">
+          <div className="bk__success-icon">✅</div>
           <h1 className="bk__title">¡Reserva confirmada!</h1>
           <p className="bk__info">
-            Tu turno para <strong>{product?.name}</strong> fue registrado.
+            Tu turno para <strong>{product?.name}</strong> fue registrado exitosamente.
           </p>
+          <div className="bk__success-detail">
+            <p><strong>Fecha:</strong> {date}</p>
+            <p><strong>Horario:</strong> {time}</p>
+            {notes && <p><strong>Notas:</strong> {notes}</p>}
+          </div>
           <p className="bk__info">
-            Recibirás novedades por correo cuando el administrador la procese.
+            Recibirás un correo con los detalles de tu reserva.
           </p>
-          <button
-            type="button"
-            className="bk__btn-primary"
-            onClick={() => navigate("/")}
-          >
-            Volver al inicio
-          </button>
+          <div className="bk__success-actions">
+            <button
+              type="button"
+              className="bk__btn-primary"
+              onClick={() => navigate("/")}
+            >
+              Volver al inicio
+            </button>
+            <button
+              type="button"
+              className="bk__btn-secondary"
+              onClick={() => navigate("/mis-reservas")}
+            >
+              Ver mis reservas
+            </button>
+          </div>
         </div>
       </main>
     );
@@ -151,14 +169,12 @@ await api.post("/api/bookings", payload);
   return (
     <main className="bk">
       <div className="bk__container">
-        {/* Volver */}
         <div className="bk__top-bar">
           <Link to={`/products/${id}`} className="bk__link-back">
             ← Volver al detalle
           </Link>
         </div>
 
-        {/* Layout en dos columnas */}
         <section className="bk__layout">
           {/* Resumen del servicio */}
           <aside className="bk__summary">
@@ -175,6 +191,15 @@ await api.post("/api/bookings", payload);
                 <li>💲 Desde ${product.priceFrom}</li>
               )}
             </ul>
+
+            {/* #31 — Datos del usuario */}
+            {user && (
+              <div className="bk__user-info">
+                <h2 className="bk__section-title">Tus datos</h2>
+                <p><span className="bk__label">Nombre:</span> {user.firstName} {user.lastName}</p>
+                <p><span className="bk__label">Email:</span> {user.email}</p>
+              </div>
+            )}
           </aside>
 
           {/* Formulario */}
@@ -194,6 +219,7 @@ await api.post("/api/bookings", payload);
                   id="date"
                   type="date"
                   value={date}
+                  min={new Date().toISOString().slice(0, 10)}
                   onChange={(e) => setDate(e.target.value)}
                   required
                 />

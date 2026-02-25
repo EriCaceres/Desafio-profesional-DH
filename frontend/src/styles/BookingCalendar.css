@@ -20,4 +20,55 @@
   display: none !important;
 }
 
+/* ── Agregar al final de frontend/src/styles/BookingCalendar.css ── */
 
+/* Fechas deshabilitadas (ocupadas) — color rojo claro */
+.rdrDayDisabled .rdrDayNumber span {
+  color: #e53e3e !important;
+  text-decoration: line-through;
+}
+.rdrDayDisabled {
+  background-color: #fff5f5 !important;
+}
+
+/* Leyenda */
+.bc__legend {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.78rem;
+  color: #555;
+  margin-bottom: 8px;
+}
+.bc__legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+}
+.bc__legend-dot--taken {
+  background-color: #e53e3e;
+}
+
+/* Estado de error */
+.bc--error {
+  padding: 16px;
+  text-align: center;
+}
+.bc__error-msg {
+  color: #c53030;
+  font-size: 0.9rem;
+  margin-bottom: 10px;
+}
+.bc__retry-btn {
+  background: #e53e3e;
+  color: white;
+  border: none;
+  padding: 6px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+.bc__retry-btn:hover {
+  background: #c53030;
+}

@@ -39,7 +39,7 @@ public class ProductService {
         return productRepo.findAll().stream()
                 .filter(p ->
                         (p.getName() != null && p.getName().toLowerCase().contains(q)) ||
-                        (p.getDescription() != null && p.getDescription().toLowerCase().contains(q))
+                                (p.getDescription() != null && p.getDescription().toLowerCase().contains(q))
                 )
                 .toList();
     }
@@ -54,7 +54,6 @@ public class ProductService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El nombre es obligatorio");
         }
 
-        // Verificar nombre duplicado
         boolean exists = productRepo.findAll().stream()
                 .anyMatch(p -> p.getName().equalsIgnoreCase(request.name.trim()));
         if (exists) {

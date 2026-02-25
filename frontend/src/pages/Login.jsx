@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation, Link } from "react-router-dom";
 import { api } from "../services/api";
 
 export default function Login() {
@@ -8,7 +8,12 @@ export default function Login() {
   const [error, setError]       = useState("");
   const [loading, setLoading]   = useState(false);
 
-  const navigate = useNavigate();
+  const navigate  = useNavigate();
+  const location  = useLocation();
+
+  // Si venimos desde /products/:id/booking (o cualquier otra ruta), volvemos ahí
+  const from      = location.state?.from || "/";
+  const mandatory = !!location.state?.mandatory; // true cuando el login es obligatorio
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -21,17 +26,12 @@ export default function Login() {
 
     try {
       setLoading(true);
-      const body = { email, password };
-      const { data } = await api.post("/api/auth/login", body);
-
+      const { data } = await api.post("/api/auth/login", { email, password });
       localStorage.setItem("user", JSON.stringify(data));
-
-      navigate("/"); // ir al home
+      navigate(from, { replace: true });
     } catch (e) {
       console.error(e);
-      const msg =
-        e.response?.data?.message || "No se pudo iniciar sesión";
-      setError(msg);
+      setError(e.response?.data?.message || "No se pudo iniciar sesión");
     } finally {
       setLoading(false);
     }
@@ -40,15 +40,26 @@ export default function Login() {
   return (
     <main className="bg-gray-100 min-h-screen pt-16 pb-10">
       <div className="max-w-md mx-auto bg-white rounded shadow p-6 mt-6 space-y-4">
+
+        {/* Mensaje obligatorio (#30) */}
+        {mandatory && (
+          <div className="bg-amber-50 border border-amber-300 rounded p-3 text-sm text-amber-800">
+            <strong>Iniciá sesión para continuar.</strong> Para realizar una reserva
+            necesitás estar registrado. Si no tenés cuenta,{" "}
+            <Link to="/register" className="underline font-semibold">
+              registrate aquí
+            </Link>
+            .
+          </div>
+        )}
+
         <h1 className="text-xl font-bold">Iniciar sesión</h1>
 
         {error && <p className="text-sm text-red-600">{error}</p>}
 
         <form className="space-y-3" onSubmit={handleSubmit}>
           <div>
-            <label className="block text-sm font-medium mb-1">
-              Email
-            </label>
+            <label className="block text-sm font-medium mb-1">Email</label>
             <input
               type="email"
               className="border rounded px-2 py-1 w-full"
@@ -58,9 +69,7 @@ export default function Login() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">
-              Contraseña
-            </label>
+            <label className="block text-sm font-medium mb-1">Contraseña</label>
             <input
               type="password"
               className="border rounded px-2 py-1 w-full"
@@ -77,6 +86,13 @@ export default function Login() {
             {loading ? "Ingresando..." : "Ingresar"}
           </button>
         </form>
+
+        <p className="text-sm text-center text-slate-500">
+          ¿No tenés cuenta?{" "}
+          <Link to="/register" className="underline font-semibold text-blue-600">
+            Registrate
+          </Link>
+        </p>
       </div>
     </main>
   );

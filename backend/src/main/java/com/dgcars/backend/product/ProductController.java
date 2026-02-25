@@ -7,6 +7,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/products")
+@CrossOrigin
 public class ProductController {
 
     private final ProductService productService;
@@ -25,6 +26,10 @@ public class ProductController {
         return productService.search(query);
     }
 
+    /**
+     * GET /api/products/available?startDate=2025-03-01&endDate=2025-03-05
+     * Devuelve productos sin reservas en ese rango.
+     */
     @GetMapping("/{id}")
     public Product get(@PathVariable Long id) {
         return productService.getById(id);

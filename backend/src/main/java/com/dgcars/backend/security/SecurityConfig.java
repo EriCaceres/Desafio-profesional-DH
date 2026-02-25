@@ -42,23 +42,25 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-            .csrf(csrf -> csrf.disable())
-            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .authorizeHttpRequests(auth -> auth
-                // Público: registro, login, ver productos y categorías
-                .requestMatchers("/api/auth/**").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/products/**").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/categories/**").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/features/**").permitAll()
-                // H2 console (solo desarrollo)
-                .requestMatchers("/h2-console/**").permitAll()
-                // Todo lo demás requiere autenticación
-                .anyRequest().authenticated()
-            )
-            .headers(headers -> headers.frameOptions(f -> f.disable())) // para H2 console
-            .addFilterBefore(new JwtFilter(jwtUtil, userDetailsService),
-                    UsernamePasswordAuthenticationFilter.class);
+                .csrf(csrf -> csrf.disable())
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(auth -> auth
+                        // Público: registro, login, ver productos y categorías
+                        .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/products/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/categories/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/features/**").permitAll()
+                        // Público: ver reservas por producto (calendario de disponibilidad)
+                        .requestMatchers(HttpMethod.GET, "/api/bookings/product/**").permitAll()
+                        // H2 console (solo desarrollo)
+                        .requestMatchers("/h2-console/**").permitAll()
+                        // Todo lo demás requiere autenticación
+                        .anyRequest().authenticated()
+                )
+                .headers(headers -> headers.frameOptions(f -> f.disable()))
+                .addFilterBefore(new JwtFilter(jwtUtil, userDetailsService),
+                        UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }

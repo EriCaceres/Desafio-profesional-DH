@@ -4,6 +4,38 @@ import BookingCalendar from "../components/BookingCalendar";
 import "../styles/ProductDetail.css";
 import { useNavigate, useParams, Link } from "react-router-dom";
 
+const POLICIES = [
+  {
+    title: "Cancelación",
+    description:
+      "Podés cancelar tu reserva hasta 24 horas antes del turno sin cargo. Las cancelaciones tardías pueden tener un costo del 50% del servicio.",
+  },
+  {
+    title: "Puntualidad",
+    description:
+      "Te pedimos llegar 10 minutos antes del turno. Si el retraso supera los 15 minutos, el turno puede ser reasignado.",
+  },
+  {
+    title: "Estado del vehículo",
+    description:
+      "El vehículo debe estar vacío de objetos personales de valor. No nos responsabilizamos por objetos olvidados dentro del auto.",
+  },
+  {
+    title: "Garantía del servicio",
+    description:
+      "Si no quedás conforme con el resultado, contactanos dentro de las 48 horas y lo revisamos sin costo adicional.",
+  },
+  {
+    title: "Métodos de pago",
+    description:
+      "Aceptamos efectivo, transferencia bancaria y tarjetas de débito/crédito. El pago se realiza al finalizar el servicio.",
+  },
+  {
+    title: "Seguridad",
+    description:
+      "Trabajamos con productos certificados y seguros para la pintura y tapizados de tu vehículo.",
+  },
+];
 
 export default function ProductDetail() {
   const { id } = useParams();
@@ -11,7 +43,6 @@ export default function ProductDetail() {
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState("");
   const navigate = useNavigate();
-
 
   useEffect(() => {
     const load = async () => {
@@ -30,8 +61,20 @@ export default function ProductDetail() {
     load();
   }, [id]);
 
-  const handleReserveClick = () => {
-    alert("El flujo de reserva se implementa en el Sprint 4 😊");
+  // #30 — chequeo de login al hacer clic en Reservar
+  const handleReserve = () => {
+    const stored = localStorage.getItem("user");
+    if (!stored) {
+      // Redirigir a login con mensaje obligatorio y ruta de retorno
+      navigate("/login", {
+        state: {
+          mandatory: true,
+          from: `/products/${id}/booking`,
+        },
+      });
+      return;
+    }
+    navigate(`/products/${id}/booking`);
   };
 
   if (loading) {
@@ -84,7 +127,7 @@ export default function ProductDetail() {
           </div>
         </section>
 
-        {/* CONTENIDO: dos columnas en desktop, una en mobile */}
+        {/* CONTENIDO */}
         <section className="pd__content">
           {/* Columna izquierda */}
           <div className="pd__left">
@@ -92,10 +135,10 @@ export default function ProductDetail() {
               <h2 className="pd__card-title">Descripción del servicio</h2>
               <p className="pd__card-text">{product.description}</p>
             </section>
-            {/* RESEÑAS (mock por ahora) */}
+
+            {/* RESEÑAS */}
             <section className="pd__card">
               <h2 className="pd__card-title">Reseñas</h2>
-
               <article className="pd__review-card">
                 <div className="pd__review-header">
                   <span className="pd__review-user">Cliente frecuente</span>
@@ -106,7 +149,6 @@ export default function ProductDetail() {
                   El auto quedó impecable, superaron mis expectativas.
                 </p>
               </article>
-
               <article className="pd__review-card">
                 <div className="pd__review-header">
                   <span className="pd__review-user">Nueva usuaria</span>
@@ -119,7 +161,7 @@ export default function ProductDetail() {
               </article>
             </section>
 
-
+            {/* CARACTERÍSTICAS */}
             {hasFeatures && (
               <section className="pd__card">
                 <h2 className="pd__card-title">Incluye</h2>
@@ -133,6 +175,21 @@ export default function ProductDetail() {
                 </ul>
               </section>
             )}
+
+            {/* POLÍTICAS (#26) */}
+            <section className="pd__card pd__policies">
+              <h2 className="pd__card-title pd__policies-title">
+                Políticas del servicio
+              </h2>
+              <div className="pd__policies-grid">
+                {POLICIES.map((pol) => (
+                  <div key={pol.title} className="pd__policy-item">
+                    <h3 className="pd__policy-name">{pol.title}</h3>
+                    <p className="pd__policy-desc">{pol.description}</p>
+                  </div>
+                ))}
+              </div>
+            </section>
           </div>
 
           {/* Columna derecha */}
@@ -148,7 +205,7 @@ export default function ProductDetail() {
               <button
                 type="button"
                 className="pd__btn-reserve"
-                onClick={() => navigate(`/products/${product.id}/booking`)}
+                onClick={handleReserve}
               >
                 Reservar este servicio
               </button>
@@ -159,7 +216,3 @@ export default function ProductDetail() {
     </main>
   );
 }
-
-
-
-

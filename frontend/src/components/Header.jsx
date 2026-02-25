@@ -8,12 +8,16 @@ export default function Header() {
   useEffect(() => {
     const stored = localStorage.getItem("user");
     if (stored) {
-      try {
-        setUser(JSON.parse(stored));
-      } catch {
-        setUser(null);
-      }
+      try { setUser(JSON.parse(stored)); } catch { setUser(null); }
     }
+
+    // Actualizar cuando cambia el storage (login/logout en otra tab)
+    const onStorage = () => {
+      const s = localStorage.getItem("user");
+      try { setUser(s ? JSON.parse(s) : null); } catch { setUser(null); }
+    };
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
   }, []);
 
   const handleLogout = () => {
@@ -27,12 +31,14 @@ export default function Header() {
     : "";
 
   const isAdmin =
-    user && Array.isArray(user.roles) ? user.roles.some((r) => r.name === "ADMIN") : false;
+    user && Array.isArray(user.roles)
+      ? user.roles.some((r) => r.name === "ADMIN")
+      : false;
 
   return (
     <header className="fixed top-0 left-0 right-0 bg-white border-b border-slate-200 z-50">
       <div className="max-w-7xl mx-auto flex items-center justify-between h-16 px-4 lg:px-8">
-        {/* Logo + lema */}
+        {/* Logo */}
         <Link
           to="/"
           className="flex flex-col gap-0.5 no-underline text-slate-900 hover:text-slate-900"
@@ -46,6 +52,16 @@ export default function Header() {
         {/* Zona derecha */}
         {user ? (
           <div className="flex items-center gap-3">
+            {/* Link a favoritos */}
+            <Link
+              to="/favoritos"
+              className="text-sm font-semibold text-slate-700 hover:text-red-500 flex items-center gap-1"
+              title="Mis favoritos"
+            >
+              <span className="text-red-400">♥</span>
+              <span className="hidden sm:inline">Favoritos</span>
+            </Link>
+
             {isAdmin && (
               <Link
                 to="/administración"
@@ -59,7 +75,7 @@ export default function Header() {
               <div className="w-8 h-8 rounded-full bg-orange-500 text-white flex items-center justify-center text-xs font-bold">
                 {initials || "U"}
               </div>
-              <span className="text-sm text-slate-700">
+              <span className="text-sm text-slate-700 hidden sm:inline">
                 Hola, <span className="font-semibold">{user.firstName || "usuario"}</span>
               </span>
             </div>

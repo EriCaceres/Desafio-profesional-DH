@@ -219,6 +219,49 @@
   font-size: 0.85rem;
   color: #374151;
 }
+/* ── AGREGAR AL FINAL DE ProductDetail.css ─────────────────── */
 
+/* Políticas del servicio (#26) */
+.pd__policies {
+  width: 100%;
+}
+
+.pd__policies-title {
+  text-decoration: underline;
+}
+
+.pd__policies-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  margin-top: 0.75rem;
+}
+
+.pd__policy-item {
+  padding: 0.75rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border-left: 3px solid #e85d04;
+}
+
+.pd__policy-name {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0 0 0.35rem 0;
+}
+
+.pd__policy-desc {
+  font-size: 0.82rem;
+  color: #555;
+  margin: 0;
+  line-height: 1.5;
+}
+
+@media (max-width: 640px) {
+  .pd__policies-grid {
+    grid-template-columns: 1fr;
+  }
+}
 
 
