@@ -264,4 +264,33 @@
   }
 }
 
+/* Agrega estos estilos al archivo ProductDetail.css existente */
 
+/* Modificación del top-bar para incluir el botón de compartir */
+.pd__top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+/* Si no existe, agregar estos estilos base del link-back */
+.pd__link-back {
+  color: #059669;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.pd__link-back:hover {
+  color: #047857;
+}
+
+/* Responsive para el top-bar */
+@media (max-width: 768px) {
+  .pd__top-bar {
+    flex-direction: column;
+    gap: 12px;
+    align-items: stretch;
+  }
+}

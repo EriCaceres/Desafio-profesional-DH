@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { api } from "../services/api";
 import BookingCalendar from "../components/BookingCalendar";
+import ShareButton from "../components/ShareButton";
+import ShareModal from "../components/ShareModal";
 import "../styles/ProductDetail.css";
 import { useNavigate, useParams, Link } from "react-router-dom";
 
@@ -42,6 +44,7 @@ export default function ProductDetail() {
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState("");
+  const [shareModalOpen, setShareModalOpen] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -75,6 +78,11 @@ export default function ProductDetail() {
       return;
     }
     navigate(`/products/${id}/booking`);
+  };
+
+  // #27 — Abrir modal de compartir
+  const handleShare = () => {
+    setShareModalOpen(true);
   };
 
   if (loading) {
@@ -111,6 +119,8 @@ export default function ProductDetail() {
           <Link to="/" className="pd__link-back">
             ← Volver al inicio
           </Link>
+          {/* #27 - Botón compartir */}
+          <ShareButton onClick={handleShare} />
         </div>
 
         {/* HEADER */}
@@ -213,6 +223,13 @@ export default function ProductDetail() {
           </aside>
         </section>
       </div>
+
+      {/* #27 - Modal de compartir */}
+      <ShareModal
+        isOpen={shareModalOpen}
+        onClose={() => setShareModalOpen(false)}
+        product={product}
+      />
     </main>
   );
 }

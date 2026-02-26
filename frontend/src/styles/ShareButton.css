@@ -1,0 +1,37 @@
+/* ShareButton.css */
+
+.share-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background-color: #f3f4f6;
+  color: #374151;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.share-button:hover {
+  background-color: #e5e7eb;
+  border-color: #9ca3af;
+}
+
+.share-button:active {
+  transform: scale(0.98);
+}
+
+.share-button svg {
+  flex-shrink: 0;
+}
+
+/* Variante para mobile */
+@media (max-width: 640px) {
+  .share-button {
+    width: 100%;
+    justify-content: center;
+  }
+}
