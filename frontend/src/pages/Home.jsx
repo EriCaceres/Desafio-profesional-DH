@@ -54,12 +54,13 @@ export default function Home() {
         setCategories(cats);
         setAllProducts(prods);
         setProducts(prods);
-      } catch {
+      } catch (err) {
+        console.error("❌ Error cargando datos:", err?.message);
+        console.error("❌ Status:", err?.response?.status, "| Data:", err?.response?.data);
         if (!mounted) return;
         setErrorMsg("No se pudieron cargar los servicios.");
       } finally {
-        if (!mounted) return;
-        setLoading(false);
+        if (mounted) setLoading(false);
       }
     };
 

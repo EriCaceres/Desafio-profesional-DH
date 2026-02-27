@@ -53,6 +53,10 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/features/**").permitAll()
                         // Público: ver reservas por producto (calendario de disponibilidad)
                         .requestMatchers(HttpMethod.GET, "/api/bookings/product/**").permitAll()
+                        // Público: ver horarios ocupados en una fecha (formulario de reserva)
+                        .requestMatchers(HttpMethod.GET, "/api/bookings/occupied").permitAll()
+                        // Público: ver reseñas de un producto
+                        .requestMatchers(HttpMethod.GET, "/api/ratings/product/**").permitAll()
                         // H2 console (solo desarrollo)
                         .requestMatchers("/h2-console/**").permitAll()
                         // Todo lo demás requiere autenticación

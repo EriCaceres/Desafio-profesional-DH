@@ -33,18 +33,11 @@ public class AuthService {
         user.setFirstName(request.getFirstName());
         user.setLastName(request.getLastName());
         user.setEmail(request.getEmail());
-        // 🔐 Encriptamos la contraseña antes de guardar
         user.setPassword(passwordEncoder.encode(request.getPassword()));
 
         Role roleUser = roleRepo.findByName("USER")
                 .orElseGet(() -> roleRepo.save(new Role("USER")));
         user.addRole(roleUser);
-
-        if (request.getEmail().startsWith("admin@")) {
-            Role roleAdmin = roleRepo.findByName("ADMIN")
-                    .orElseGet(() -> roleRepo.save(new Role("ADMIN")));
-            user.addRole(roleAdmin);
-        }
 
         User saved = userRepo.save(user);
         return new UserResponseDTO(saved);

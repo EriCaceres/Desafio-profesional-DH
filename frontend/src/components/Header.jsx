@@ -11,7 +11,7 @@ export default function Header() {
       try { setUser(JSON.parse(stored)); } catch { setUser(null); }
     }
 
-    // Actualizar cuando cambia el storage (login/logout en otra tab)
+    // ✅ Escucha cambios de storage (login/logout desde cualquier lugar)
     const onStorage = () => {
       const s = localStorage.getItem("user");
       try { setUser(s ? JSON.parse(s) : null); } catch { setUser(null); }
@@ -21,8 +21,14 @@ export default function Header() {
   }, []);
 
   const handleLogout = () => {
+    // ✅ FIX: limpiar user Y favoritos al cerrar sesión
     localStorage.removeItem("user");
+    localStorage.removeItem("favorites"); // ajustá el nombre si usás otra key
     setUser(null);
+
+    // ✅ FIX: notificar a otros componentes en la misma pestaña
+    window.dispatchEvent(new Event("storage"));
+
     navigate("/");
   };
 
@@ -32,7 +38,7 @@ export default function Header() {
 
   const isAdmin =
     user && Array.isArray(user.roles)
-      ? user.roles.some((r) => r.name === "ADMIN")
+      ? user.roles.some((r) => r === "ADMIN" || r?.name === "ADMIN")
       : false;
 
   return (
@@ -52,7 +58,6 @@ export default function Header() {
         {/* Zona derecha */}
         {user ? (
           <div className="flex items-center gap-3">
-            {/* Link a favoritos */}
             <Link
               to="/favoritos"
               className="text-sm font-semibold text-slate-700 hover:text-red-500 flex items-center gap-1"
@@ -60,6 +65,14 @@ export default function Header() {
             >
               <span className="text-red-400">♥</span>
               <span className="hidden sm:inline">Favoritos</span>
+            </Link>
+
+            {/* ✅ Link a Mis reservas */}
+            <Link
+              to="/mis-reservas"
+              className="text-sm font-semibold text-slate-700 hover:text-slate-900 hover:underline hidden sm:inline"
+            >
+              Mis reservas
             </Link>
 
             {isAdmin && (
@@ -105,5 +118,3 @@ export default function Header() {
     </header>
   );
 }
-
-

@@ -1,0 +1,178 @@
+/* ===========================
+   MyReservations.css
+   Estilo coherente con Mis Favoritos
+   =========================== */
+
+.mr {
+  min-height: 100vh;
+  background: #f3f4f6;
+  padding: 2rem 1rem;
+  color: #1a1a1a;
+}
+
+.mr__container {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.mr__top-bar {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 1.5rem;
+}
+
+.mr__link-back {
+  color: #f97316;
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+.mr__link-back:hover { color: #ea6c00; }
+
+.mr__title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin-bottom: 0.4rem;
+  color: #111;
+}
+
+.mr__subtitle {
+  color: #6b7280;
+  font-size: 0.95rem;
+  margin-bottom: 1.75rem;
+}
+
+.mr__info {
+  color: #6b7280;
+  padding: 3rem 0;
+}
+
+.mr__error {
+  color: #dc2626;
+  padding: 1rem 0;
+}
+
+/* EMPTY STATE */
+.mr__empty {
+  padding: 4rem 0;
+}
+.mr__empty-text {
+  color: #6b7280;
+  font-size: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+/* LIST */
+.mr__list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* CARDS - mismo estilo que favoritos */
+.mr__card {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 1.25rem 1.5rem;
+  border-left: 4px solid transparent;
+  transition: box-shadow 0.2s;
+}
+.mr__card:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+.mr__card--upcoming { border-left-color: #f97316; }
+.mr__card--past     { border-left-color: #d1d5db; }
+
+.mr__card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+  gap: 1rem;
+}
+
+.mr__product-name {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #111;
+  margin: 0;
+}
+
+/* BADGES */
+.mr__badge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+.mr__badge--upcoming {
+  background: #fff7ed;
+  color: #ea580c;
+  border: 1px solid #fed7aa;
+}
+.mr__badge--past {
+  background: #f3f4f6;
+  color: #9ca3af;
+  border: 1px solid #e5e7eb;
+}
+
+/* BODY */
+.mr__card-body {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.mr__info-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+.mr__info-label {
+  font-size: 0.75rem;
+  color: #9ca3af;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+}
+.mr__info-value {
+  font-size: 0.95rem;
+  color: #374151;
+  font-weight: 500;
+}
+
+/* FOOTER */
+.mr__card-footer {
+  display: flex;
+  gap: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid #f3f4f6;
+}
+
+/* BUTTONS */
+.mr__btn {
+  display: inline-block;
+  padding: 0.45rem 1.1rem;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  text-decoration: none;
+  transition: opacity 0.2s;
+}
+.mr__btn:hover { opacity: 0.85; }
+
+.mr__btn--primary {
+  background: #f97316;
+  color: #fff;
+}
+.mr__btn--secondary {
+  background: #f3f4f6;
+  color: #374151;
+  border: 1px solid #e5e7eb;
+}

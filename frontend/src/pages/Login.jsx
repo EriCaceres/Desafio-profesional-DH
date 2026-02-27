@@ -11,9 +11,8 @@ export default function Login() {
   const navigate  = useNavigate();
   const location  = useLocation();
 
-  // Si venimos desde /products/:id/booking (o cualquier otra ruta), volvemos ahí
   const from      = location.state?.from || "/";
-  const mandatory = !!location.state?.mandatory; // true cuando el login es obligatorio
+  const mandatory = !!location.state?.mandatory;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -27,7 +26,16 @@ export default function Login() {
     try {
       setLoading(true);
       const { data } = await api.post("/api/auth/login", { email, password });
-      localStorage.setItem("user", JSON.stringify(data));
+
+      // ✅ FIX: guardamos user + token para que el interceptor pueda enviarlo
+      const userToStore = data.user
+        ? { ...data.user, token: data.token }
+        : data;
+      localStorage.setItem("user", JSON.stringify(userToStore));
+
+      // ✅ FIX: disparar evento para que el Header se actualice en la misma pestaña
+      window.dispatchEvent(new Event("storage"));
+
       navigate(from, { replace: true });
     } catch (e) {
       console.error(e);
@@ -41,7 +49,6 @@ export default function Login() {
     <main className="bg-gray-100 min-h-screen pt-16 pb-10">
       <div className="max-w-md mx-auto bg-white rounded shadow p-6 mt-6 space-y-4">
 
-        {/* Mensaje obligatorio (#30) */}
         {mandatory && (
           <div className="bg-amber-50 border border-amber-300 rounded p-3 text-sm text-amber-800">
             <strong>Iniciá sesión para continuar.</strong> Para realizar una reserva

@@ -1,0 +1,76 @@
+/* ===========================
+   WhatsAppButton.css
+   =========================== */
+
+.wa-btn {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  z-index: 1000;
+
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: #25d366;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(37, 211, 102, 0.4);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  transition: transform 0.2s, box-shadow 0.2s;
+  color: #fff;
+}
+
+.wa-btn:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 20px rgba(37, 211, 102, 0.55);
+}
+
+.wa-btn:hover .wa-btn__tooltip {
+  opacity: 1;
+  transform: translateX(-105%) scale(1);
+}
+
+.wa-btn__icon {
+  width: 30px;
+  height: 30px;
+}
+
+/* Tooltip que aparece al lado del botón */
+.wa-btn__tooltip {
+  position: absolute;
+  right: calc(100% + 0.75rem);
+  bottom: 50%;
+  transform: translateX(-105%) scale(0.9) translateY(50%);
+  background: #1a1a1a;
+  color: #f0f0f0;
+  font-size: 0.8rem;
+  font-weight: 500;
+  white-space: nowrap;
+  padding: 0.4rem 0.75rem;
+  border-radius: 8px;
+  border: 1px solid #2a2a2a;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s, transform 0.2s;
+}
+
+/* Responsive: en móvil se ubica igual, un poco más pequeño */
+@media (max-width: 480px) {
+  .wa-btn {
+    width: 48px;
+    height: 48px;
+    bottom: 1rem;
+    right: 1rem;
+  }
+  .wa-btn__icon {
+    width: 26px;
+    height: 26px;
+  }
+  .wa-btn__tooltip {
+    display: none;
+  }
+}
