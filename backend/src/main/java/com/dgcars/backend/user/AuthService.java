@@ -44,11 +44,22 @@ public class AuthService {
     }
 
     public AuthResponseDTO login(LoginRequestDTO request) {
-        User user = userRepo.findByEmail(request.getEmail())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Credenciales inválidas"));
+        System.out.println("🔍 Buscando email: " + request.getEmail());
+        System.out.println("🔍 Password recibido: " + request.getPassword());
 
-        // 🔐 Comparamos con BCrypt, nunca en texto plano
-        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+        User user = userRepo.findByEmail(request.getEmail())
+                .orElseThrow(() -> {
+                    System.out.println("❌ Usuario no encontrado");
+                    return new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Credenciales inválidas");
+                });
+
+        System.out.println("✅ Usuario encontrado: " + user.getEmail());
+        System.out.println("🔍 Hash en BD: " + user.getPassword());
+
+        boolean matches = passwordEncoder.matches(request.getPassword(), user.getPassword());
+        System.out.println("🔍 Password matches: " + matches);
+
+        if (!matches) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Credenciales inválidas");
         }
 

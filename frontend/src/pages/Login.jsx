@@ -103,4 +103,5 @@ export default function Login() {
       </div>
     </main>
   );
+  console.log("Enviando:", { email, password });
 }

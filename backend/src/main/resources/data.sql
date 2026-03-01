@@ -90,7 +90,7 @@ INSERT INTO role (id, name) VALUES (2, 'ADMIN');
 
 -- USUARIO ADMIN PRECARGADO
 INSERT INTO users (id, first_name, last_name, email, password)
-VALUES (1, 'Admin', 'ShineLab', 'admin@shinelab.com', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LnK57pjz1c6');
+VALUES (1, 'Admin', 'ShineLab', 'admin@shinelab.com', '$2a$10$uHFVmWlxI6Qb/0EiX3ckke18yhsWKm6Ja5Yl9Wj8Qj06HwGnptgY2');
 
 -- ASIGNAR ROLES AL ADMIN
 INSERT INTO user_roles (user_id, role_id) VALUES (1, 1);

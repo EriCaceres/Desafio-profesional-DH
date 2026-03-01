@@ -2,6 +2,18 @@ import { useEffect, useState } from "react";
 import { api } from "../services/api";
 import { useNavigate } from "react-router-dom";
 
+// Mapa de íconos: clave del data.sql → emoji
+const ICON_MAP = {
+  vacuum: "🧹",
+  shield: "🛡️",
+  hand: "🤚",
+  star: "⭐",
+  layers: "🧴",
+  tool: "🔧",
+};
+
+const iconDisplay = (icon) => ICON_MAP[icon] || icon;
+
 export default function Admin() {
   const navigate = useNavigate();
 
@@ -9,7 +21,7 @@ export default function Admin() {
   const user = stored ? JSON.parse(stored) : null;
   const isAdmin =
     user && Array.isArray(user.roles)
-      ? user.roles.some((r) => r.name === "ADMIN")
+      ? user.roles.some((r) => r === "ADMIN" || r?.name === "ADMIN")
       : false;
 
   useEffect(() => {
@@ -34,6 +46,8 @@ export default function Admin() {
   const [savingCategory, setSavingCategory] = useState(false);
   const [catError, setCatError] = useState("");
 
+  // Formulario producto (crear y editar)
+  const [editingProduct, setEditingProduct] = useState(null); // null = crear, objeto = editar
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [durationMin, setDurationMin] = useState("");
@@ -117,16 +131,15 @@ export default function Admin() {
     }
   };
 
-  // #29 — Eliminar categoría con confirmación
   const handleDeleteCategory = async (cat) => {
     const confirmed = window.confirm(
-      `¿Eliminár la categoría "${cat.name}"?\n\nEsta acción puede afectar a los productos asociados a esta categoría.`
+      `¿Eliminar la categoría "${cat.name}"?\n\nEsta acción puede afectar a los productos asociados.`
     );
     if (!confirmed) return;
     try {
       await api.delete(`/api/categories/${cat.id}`);
       await loadCategories();
-      await loadProducts(); // refrescar productos por si cambia su categoría
+      await loadProducts();
     } catch {
       alert("No se pudo eliminar la categoría. Puede tener productos asociados.");
     }
@@ -136,6 +149,26 @@ export default function Admin() {
     setSelectedFeatures((prev) =>
       prev.includes(id) ? prev.filter((f) => f !== id) : [...prev, id]
     );
+  };
+
+  const handleEditProduct = (product) => {
+    setEditingProduct(product);
+    setName(product.name || "");
+    setDescription(product.description || "");
+    setDurationMin(product.durationMin || "");
+    setPriceFrom(product.priceFrom || "");
+    setCategoryId(product.category?.id || "");
+    setSelectedFeatures(product.features?.map((f) => f.id) || []);
+    setFormError("");
+    // Scroll al formulario
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const handleCancelEdit = () => {
+    setEditingProduct(null);
+    setName(""); setDescription(""); setDurationMin("");
+    setPriceFrom(""); setCategoryId(""); setSelectedFeatures([]);
+    setFormError("");
   };
 
   const handleSubmit = async (e) => {
@@ -155,9 +188,12 @@ export default function Admin() {
     };
     try {
       setSaving(true);
-      await api.post("/api/products", body);
-      setName(""); setDescription(""); setDurationMin("");
-      setPriceFrom(""); setCategoryId(""); setSelectedFeatures([]);
+      if (editingProduct) {
+        await api.put(`/api/products/${editingProduct.id}`, body);
+      } else {
+        await api.post("/api/products", body);
+      }
+      handleCancelEdit();
       await loadProducts();
     } catch (e) {
       setFormError(e.response?.data?.message || "Error al guardar el producto");
@@ -202,10 +238,31 @@ export default function Admin() {
           <span>Categorías</span>
         </nav>
 
-        {/* AGREGAR PRODUCTO */}
+        {/* FORMULARIO PRODUCTO (crear / editar) */}
         <section className="bg-white p-4 rounded shadow space-y-3">
-          <h2 className="text-lg font-semibold">Agregar producto</h2>
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-semibold">
+              {editingProduct ? `Editando: ${editingProduct.name}` : "Agregar producto"}
+            </h2>
+            {editingProduct && (
+              <button
+                type="button"
+                onClick={handleCancelEdit}
+                className="text-sm text-gray-500 hover:text-gray-700 underline"
+              >
+                Cancelar edición
+              </button>
+            )}
+          </div>
+
+          {editingProduct && (
+            <div className="bg-amber-50 border border-amber-200 rounded px-3 py-2 text-sm text-amber-800">
+              ✏️ Estás editando un producto existente. Los cambios reemplazarán los datos actuales.
+            </div>
+          )}
+
           {formError && <p className="text-sm text-red-600">{formError}</p>}
+
           <form onSubmit={handleSubmit} className="space-y-3">
             <div>
               <label className="block text-sm font-medium mb-1">Nombre *</label>
@@ -241,14 +298,18 @@ export default function Admin() {
                 {features.map((f) => (
                   <label key={f.id} className="inline-flex items-center gap-1 border rounded-full px-3 py-1 cursor-pointer">
                     <input type="checkbox" className="mr-1" checked={selectedFeatures.includes(f.id)} onChange={() => toggleFeatureSelection(f.id)} />
-                    <span>{f.icon}</span>
+                    <span>{iconDisplay(f.icon)}</span>
                     <span>{f.name}</span>
                   </label>
                 ))}
               </div>
             </div>
-            <button type="submit" disabled={saving} className="bg-blue-600 text-white px-4 py-1 rounded text-sm disabled:opacity-60">
-              {saving ? "Guardando..." : "Guardar producto"}
+            <button
+              type="submit"
+              disabled={saving}
+              className={`text-white px-4 py-1 rounded text-sm disabled:opacity-60 ${editingProduct ? "bg-orange-500 hover:bg-orange-600" : "bg-blue-600 hover:bg-blue-700"}`}
+            >
+              {saving ? "Guardando..." : editingProduct ? "Guardar cambios" : "Guardar producto"}
             </button>
           </form>
         </section>
@@ -263,8 +324,8 @@ export default function Admin() {
               <input className="border rounded px-2 py-1 w-full" value={featureName} onChange={(e) => setFeatureName(e.target.value)} />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1">Ícono *</label>
-              <input className="border rounded px-2 py-1 w-full" value={featureIcon} onChange={(e) => setFeatureIcon(e.target.value)} />
+              <label className="block text-sm font-medium mb-1">Ícono (emoji) *</label>
+              <input className="border rounded px-2 py-1 w-full" placeholder="Ej: 🧹" value={featureIcon} onChange={(e) => setFeatureIcon(e.target.value)} />
             </div>
             <button type="submit" disabled={savingFeature} className="bg-blue-600 text-white px-4 py-1 rounded text-sm disabled:opacity-60">
               {savingFeature ? "Guardando..." : "Agregar característica"}
@@ -278,7 +339,7 @@ export default function Admin() {
                 {features.map((f) => (
                   <li key={f.id} className="border rounded px-3 py-2 flex justify-between items-center">
                     <span className="flex items-center gap-2">
-                      <span className="text-lg">{f.icon}</span>
+                      <span className="text-lg">{iconDisplay(f.icon)}</span>
                       {f.name}
                     </span>
                   </li>
@@ -288,7 +349,7 @@ export default function Admin() {
           </div>
         </section>
 
-        {/* CATEGORÍAS con eliminar (#29) */}
+        {/* CATEGORÍAS */}
         <section className="bg-white p-4 rounded shadow space-y-3">
           <h2 className="text-lg font-semibold">Categorías</h2>
           {catError && <p className="text-sm text-red-600">{catError}</p>}
@@ -299,7 +360,7 @@ export default function Admin() {
             </div>
             <div>
               <label className="block text-sm font-medium mb-1">URL Imagen *</label>
-              <input className="border rounded px-2 py-1 w-full" value={catImage} onChange={(e) => setCatImage(e.target.value)} />
+              <input className="border rounded px-2 py-1 w-full" placeholder="https://..." value={catImage} onChange={(e) => setCatImage(e.target.value)} />
             </div>
             <button type="submit" disabled={savingCategory} className="bg-blue-600 text-white px-4 py-1 rounded text-sm disabled:opacity-60">
               {savingCategory ? "Guardando..." : "Agregar categoría"}
@@ -312,15 +373,12 @@ export default function Admin() {
               <ul className="space-y-2">
                 {categories.map((c) => (
                   <li key={c.id} className="border rounded px-3 py-2 flex justify-between items-center">
-                    <span className="flex items-center gap-2">
-                      <span>{c.name}</span>
-                      <img src={c.image} alt="" className="w-10 h-10 object-cover rounded" />
-                    </span>
+                    <span className="flex items-center gap-2 text-sm font-medium">{c.name}</span>
                     <button
                       onClick={() => handleDeleteCategory(c)}
                       className="text-red-600 hover:underline text-sm"
                     >
-                      Eliminar categoría
+                      Eliminar
                     </button>
                   </li>
                 ))}
@@ -339,20 +397,33 @@ export default function Admin() {
             <div className="overflow-x-auto">
               <table className="min-w-full text-sm">
                 <thead>
-                  <tr className="border-b">
+                  <tr className="border-b bg-gray-50">
                     <th className="text-left p-2">Id</th>
                     <th className="text-left p-2">Nombre</th>
+                    <th className="text-left p-2">Categoría</th>
+                    <th className="text-left p-2">Precio</th>
                     <th className="text-left p-2">Acciones</th>
                   </tr>
                 </thead>
                 <tbody>
                   {products.map((p) => (
-                    <tr key={p.id} className="border-b">
-                      <td className="p-2">{p.id}</td>
-                      <td className="p-2">{p.name}</td>
-                      <td className="p-2">
-                        <button onClick={() => handleDelete(p.id)} className="text-red-600 hover:underline">
-                          Eliminar producto
+                    <tr key={p.id} className={`border-b ${editingProduct?.id === p.id ? "bg-amber-50" : ""}`}>
+                      <td className="p-2 text-gray-500">{p.id}</td>
+                      <td className="p-2 font-medium">{p.name}</td>
+                      <td className="p-2 text-gray-500">{p.category?.name || "—"}</td>
+                      <td className="p-2 text-gray-500">{p.priceFrom ? `$${p.priceFrom.toLocaleString()}` : "—"}</td>
+                      <td className="p-2 flex gap-3">
+                        <button
+                          onClick={() => handleEditProduct(p)}
+                          className="text-blue-600 hover:underline"
+                        >
+                          Editar
+                        </button>
+                        <button
+                          onClick={() => handleDelete(p.id)}
+                          className="text-red-600 hover:underline"
+                        >
+                          Eliminar
                         </button>
                       </td>
                     </tr>

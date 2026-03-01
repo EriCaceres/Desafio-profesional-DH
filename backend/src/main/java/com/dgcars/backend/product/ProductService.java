@@ -61,6 +61,23 @@ public class ProductService {
         }
 
         Product p = new Product();
+        applyRequest(p, request);
+        return productRepo.save(p);
+    }
+
+    public Product update(Long id, ProductRequest request) {
+        Product p = productRepo.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Producto no encontrado"));
+
+        if (request.name == null || request.name.trim().isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El nombre es obligatorio");
+        }
+
+        applyRequest(p, request);
+        return productRepo.save(p);
+    }
+
+    private void applyRequest(Product p, ProductRequest request) {
         p.setName(request.name.trim());
         p.setDescription(request.description != null ? request.description.trim() : null);
         p.setDurationMin(request.durationMin);
@@ -70,15 +87,15 @@ public class ProductService {
             Category category = categoryRepo.findById(request.categoryId)
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Categoría no encontrada"));
             p.setCategory(category);
+        } else {
+            p.setCategory(null);
         }
 
+        p.getFeatures().clear();
         if (request.featureIds != null && !request.featureIds.isEmpty()) {
             List<Feature> features = featureRepo.findAllById(request.featureIds);
-            Set<Feature> featureSet = new HashSet<>(features);
-            p.getFeatures().addAll(featureSet);
+            p.getFeatures().addAll(new HashSet<>(features));
         }
-
-        return productRepo.save(p);
     }
 
     public void delete(Long id) {

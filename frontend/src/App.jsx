@@ -19,7 +19,7 @@ export default function App() {
         <main className="pt-16 flex-1">
           <Routes>
             <Route path="/" element={<Home />} />
-            <Route path="/administración" element={<Admin />} />
+            <Route path="/administracion" element={<Admin />} />
             <Route path="/products/:id" element={<ProductDetail />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />

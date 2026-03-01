@@ -77,7 +77,7 @@ export default function Header() {
 
             {isAdmin && (
               <Link
-                to="/administración"
+                to="/administracion"
                 className="text-sm font-semibold text-slate-700 hover:text-slate-900 hover:underline"
               >
                 Panel admin

@@ -26,10 +26,6 @@ public class ProductController {
         return productService.search(query);
     }
 
-    /**
-     * GET /api/products/available?startDate=2025-03-01&endDate=2025-03-05
-     * Devuelve productos sin reservas en ese rango.
-     */
     @GetMapping("/{id}")
     public Product get(@PathVariable Long id) {
         return productService.getById(id);
@@ -39,6 +35,11 @@ public class ProductController {
     @ResponseStatus(HttpStatus.CREATED)
     public Product create(@RequestBody ProductRequest request) {
         return productService.create(request);
+    }
+
+    @PutMapping("/{id}")
+    public Product update(@PathVariable Long id, @RequestBody ProductRequest request) {
+        return productService.update(id, request);
     }
 
     @DeleteMapping("/{id}")

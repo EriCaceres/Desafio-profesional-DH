@@ -24,5 +24,7 @@ public class AuthController {
     public AuthResponseDTO login(@Valid @RequestBody LoginRequestDTO request) {
         return authService.login(request);
     }
+
 }
+
 
