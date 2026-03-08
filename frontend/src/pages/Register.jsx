@@ -20,10 +20,32 @@ export default function Register() {
     setError("");
     setOk(false);
 
-    if (!firstName || !lastName || !email || !password) {
+    if (!firstName.trim() || !lastName.trim() || !email.trim() || !password) {
       setError("Todos los campos son obligatorios");
       return;
     }
+
+    if (firstName.trim().length < 2) {
+      setError("El nombre debe tener al menos 2 caracteres");
+      return;
+    }
+
+    if (lastName.trim().length < 2) {
+      setError("El apellido debe tener al menos 2 caracteres");
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email.trim())) {
+      setError("El email no tiene un formato válido");
+      return;
+    }
+
+    if (password.length < 6) {
+      setError("La contraseña debe tener al menos 6 caracteres");
+      return;
+    }
+
     if (password !== confirm) {
       setError("Las contraseñas no coinciden");
       return;
@@ -32,22 +54,19 @@ export default function Register() {
     try {
       setLoading(true);
 
-      const body = { firstName, lastName, email, password };
+      const body = { firstName: firstName.trim(), lastName: lastName.trim(), email: email.trim(), password };
       const { data } = await api.post("/api/auth/register", body);
-
 
       localStorage.setItem("user", JSON.stringify(data));
 
       setOk(true);
-
 
       setTimeout(() => {
         navigate("/");
       }, 1000);
     } catch (e) {
       console.error(e);
-      const msg =
-        e.response?.data?.message || "No se pudo registrar el usuario";
+      const msg = e.response?.data?.message || "No se pudo registrar el usuario";
       setError(msg);
     } finally {
       setLoading(false);
@@ -68,9 +87,7 @@ export default function Register() {
 
         <form className="space-y-3" onSubmit={handleSubmit}>
           <div>
-            <label className="block text-sm font-medium mb-1">
-              Nombre
-            </label>
+            <label className="block text-sm font-medium mb-1">Nombre</label>
             <input
               className="border rounded px-2 py-1 w-full"
               value={firstName}
@@ -79,9 +96,7 @@ export default function Register() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">
-              Apellido
-            </label>
+            <label className="block text-sm font-medium mb-1">Apellido</label>
             <input
               className="border rounded px-2 py-1 w-full"
               value={lastName}
@@ -90,9 +105,7 @@ export default function Register() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">
-              Email
-            </label>
+            <label className="block text-sm font-medium mb-1">Email</label>
             <input
               type="email"
               className="border rounded px-2 py-1 w-full"
@@ -102,27 +115,29 @@ export default function Register() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">
-              Contraseña
-            </label>
+            <label className="block text-sm font-medium mb-1">Contraseña</label>
             <input
               type="password"
               className="border rounded px-2 py-1 w-full"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
+            {password && password.length < 6 && (
+              <p className="text-xs text-amber-600 mt-1">Mínimo 6 caracteres</p>
+            )}
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">
-              Repetir contraseña
-            </label>
+            <label className="block text-sm font-medium mb-1">Repetir contraseña</label>
             <input
               type="password"
               className="border rounded px-2 py-1 w-full"
               value={confirm}
               onChange={(e) => setConfirm(e.target.value)}
             />
+            {confirm && confirm !== password && (
+              <p className="text-xs text-red-500 mt-1">Las contraseñas no coinciden</p>
+            )}
           </div>
 
           <button

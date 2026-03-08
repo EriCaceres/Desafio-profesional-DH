@@ -1,8 +1,8 @@
 package com.dgcars.backend.category;
 
-import org.springframework.web.bind.annotation.*;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -11,32 +11,26 @@ import java.util.List;
 @CrossOrigin
 public class CategoryController {
 
-    private final CategoryRepository repo;
+    private final CategoryService service;
 
-    public CategoryController(CategoryRepository repo) {
-        this.repo = repo;
+    public CategoryController(CategoryService service) {
+        this.service = service;
     }
 
     @GetMapping
     public List<Category> list() {
-        return repo.findAll();
+        return service.findAll();
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Category create(@RequestBody Category c) {
-        if (repo.findByName(c.getName()).isPresent()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Nombre de categoría ya existe");
-        }
-        return repo.save(c);
+    public Category create(@Valid @RequestBody Category c) {
+        return service.create(c);
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable Long id) {
-        if (!repo.existsById(id)) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Categoría no encontrada");
-        }
-        repo.deleteById(id);
+        service.delete(id);
     }
 }

@@ -18,22 +18,26 @@ export default function Login() {
     e.preventDefault();
     setError("");
 
-    if (!email || !password) {
+    if (!email.trim() || !password) {
       setError("Email y contraseña son obligatorios");
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email.trim())) {
+      setError("El email no tiene un formato válido");
       return;
     }
 
     try {
       setLoading(true);
-      const { data } = await api.post("/api/auth/login", { email, password });
+      const { data } = await api.post("/api/auth/login", { email: email.trim(), password });
 
-      // ✅ FIX: guardamos user + token para que el interceptor pueda enviarlo
       const userToStore = data.user
         ? { ...data.user, token: data.token }
         : data;
       localStorage.setItem("user", JSON.stringify(userToStore));
 
-      // ✅ FIX: disparar evento para que el Header se actualice en la misma pestaña
       window.dispatchEvent(new Event("storage"));
 
       navigate(from, { replace: true });
@@ -103,5 +107,4 @@ export default function Login() {
       </div>
     </main>
   );
-  console.log("Enviando:", { email, password });
 }

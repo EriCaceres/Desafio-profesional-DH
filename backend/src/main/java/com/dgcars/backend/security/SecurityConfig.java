@@ -46,19 +46,30 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        // Público: registro, login, ver productos y categorías
+                        // Público: registro, login
                         .requestMatchers("/api/auth/**").permitAll()
+                        // Público: ver productos, categorías y características
                         .requestMatchers(HttpMethod.GET, "/api/products/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/categories/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/features/**").permitAll()
-                        // Público: ver reservas por producto (calendario de disponibilidad)
+                        // Público: calendario de disponibilidad y horarios ocupados
                         .requestMatchers(HttpMethod.GET, "/api/bookings/product/**").permitAll()
-                        // Público: ver horarios ocupados en una fecha (formulario de reserva)
                         .requestMatchers(HttpMethod.GET, "/api/bookings/occupied").permitAll()
                         // Público: ver reseñas de un producto
                         .requestMatchers(HttpMethod.GET, "/api/ratings/product/**").permitAll()
                         // H2 console (solo desarrollo)
                         .requestMatchers("/h2-console/**").permitAll()
+                        // Solo ADMIN: gestión de usuarios y asignación de roles
+                        .requestMatchers("/api/users/**").hasRole("ADMIN")
+                        // Solo ADMIN: crear, editar y eliminar productos, categorías y características
+                        .requestMatchers(HttpMethod.POST, "/api/products/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/products/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/products/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/categories/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/categories/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/features/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/features/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/features/**").hasRole("ADMIN")
                         // Todo lo demás requiere autenticación
                         .anyRequest().authenticated()
                 )

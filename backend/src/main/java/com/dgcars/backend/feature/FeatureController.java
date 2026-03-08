@@ -1,8 +1,8 @@
 package com.dgcars.backend.feature;
 
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -11,23 +11,31 @@ import java.util.List;
 @CrossOrigin
 public class FeatureController {
 
-    private final FeatureRepository repo;
+    private final FeatureService service;
 
-    public FeatureController(FeatureRepository repo) {
-        this.repo = repo;
+    public FeatureController(FeatureService service) {
+        this.service = service;
     }
 
     @GetMapping
     public List<Feature> list() {
-        return repo.findAll();
+        return service.findAll();
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Feature create(@RequestBody Feature f) {
-        if (repo.findByName(f.getName()).isPresent()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Nombre de característica ya existe");
-        }
-        return repo.save(f);
+    public Feature create(@Valid @RequestBody Feature f) {
+        return service.create(f);
+    }
+
+    @PutMapping("/{id}")
+    public Feature update(@PathVariable Long id, @Valid @RequestBody Feature f) {
+        return service.update(id, f);
+    }
+
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void delete(@PathVariable Long id) {
+        service.delete(id);
     }
 }
